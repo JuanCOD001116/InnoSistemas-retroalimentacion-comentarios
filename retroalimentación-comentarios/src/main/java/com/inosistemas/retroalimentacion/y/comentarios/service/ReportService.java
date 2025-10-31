@@ -25,8 +25,12 @@ public class ReportService {
         List<Map<String, Object>> feedback = jdbc.queryForList(
                 "select f.id, f.content, f.created_at, f.author_id, coalesce(f.project_id, f.task_id, f.delivery_id) as scope_id, " +
                         "case when f.project_id is not null then 'project' when f.task_id is not null then 'task' else 'delivery' end as scope " +
-                        "from feedback f left join deliveries d on d.id = f.delivery_id " +
-                        "left join teams t on t.id = d.team_id where (f.project_id = ? or t.project_id = ?) and f.is_deleted = false order by f.created_at asc",
+                        "from feedback f " +
+                        "left join deliveries d on d.id = f.delivery_id " +
+                        "left join tasks ta on ta.id = f.task_id " +
+                        "left join deliveries dt on dt.id = ta.id_delivery " +
+                        "left join teams t on t.id = coalesce(d.team_id, dt.team_id) " +
+                        "where (f.project_id = ? or t.project_id = ?) and f.is_deleted = false order by f.created_at asc",
                 projectId, projectId);
 
         return Map.of("project", project, "feedback", feedback);

@@ -50,7 +50,9 @@ public class AuthorizationService {
 
     public boolean canAccessTaskAsProfessor(long userId, long taskId) {
         String sql = "SELECT 1 FROM tasks ta " +
-                "JOIN projects p ON p.id = ta.project_id " +
+                "JOIN deliveries d ON d.id = ta.id_delivery " +
+                "JOIN teams t ON t.id = d.team_id " +
+                "JOIN projects p ON p.id = t.project_id " +
                 "JOIN course_teachers ct ON ct.course_id = p.course_id " +
                 "WHERE ta.id = ? AND ct.teacher_id = ? LIMIT 1";
         Integer result = jdbcTemplate.queryForObject(sql, Integer.class, taskId, userId);
@@ -59,8 +61,8 @@ public class AuthorizationService {
 
     public boolean canAccessTaskAsStudent(long userId, long taskId) {
         String sql = "SELECT 1 FROM tasks ta " +
-                "JOIN projects p ON p.id = ta.project_id " +
-                "JOIN teams t ON t.project_id = p.id " +
+                "JOIN deliveries d ON d.id = ta.id_delivery " +
+                "JOIN teams t ON t.id = d.team_id " +
                 "JOIN team_members tm ON tm.team_id = t.id " +
                 "WHERE ta.id = ? AND (tm.student_id = ? OR ta.assignee_id = ?) LIMIT 1";
         Integer result = jdbcTemplate.queryForObject(sql, Integer.class, taskId, userId, userId);

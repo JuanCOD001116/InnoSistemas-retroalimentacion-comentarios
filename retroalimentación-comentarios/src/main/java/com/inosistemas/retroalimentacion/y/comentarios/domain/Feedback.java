@@ -20,7 +20,7 @@ public class Feedback {
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
-    @Column(name = "delivery_id", nullable = false)
+    @Column(name = "delivery_id")
     private Long deliveryId;
 
     @Column(name = "project_id")

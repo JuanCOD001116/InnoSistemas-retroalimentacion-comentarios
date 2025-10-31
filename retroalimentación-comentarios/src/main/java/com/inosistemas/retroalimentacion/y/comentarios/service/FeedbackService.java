@@ -1,5 +1,6 @@
 package com.inosistemas.retroalimentacion.y.comentarios.service;
 
+import com.inosistemas.retroalimentacion.y.comentarios.config.RabbitMQConfig;
 import com.inosistemas.retroalimentacion.y.comentarios.domain.Feedback;
 import com.inosistemas.retroalimentacion.y.comentarios.domain.FeedbackResponse;
 import com.inosistemas.retroalimentacion.y.comentarios.repository.FeedbackRepository;
@@ -50,11 +51,15 @@ public class FeedbackService {
 
     @Transactional
     public Feedback createFeedback(long userId, boolean isProfessor, Long projectId, Long taskId, Long deliveryId, String content) {
-        String topic;
-        if (deliveryId != null) { ensureAccessToDelivery(userId, isProfessor, deliveryId); topic = "/topic/delivery/" + deliveryId; }
-        else if (taskId != null) { ensureAccessToTask(userId, isProfessor, taskId); topic = "/topic/task/" + taskId; }
-        else if (projectId != null) { ensureAccessToProject(userId, isProfessor, projectId); topic = "/topic/project/" + projectId; }
-        else throw new IllegalArgumentException("Debe especificar projectId, taskId o deliveryId");
+        if (deliveryId != null) { 
+            ensureAccessToDelivery(userId, isProfessor, deliveryId); 
+        } else if (taskId != null) { 
+            ensureAccessToTask(userId, isProfessor, taskId); 
+        } else if (projectId != null) { 
+            ensureAccessToProject(userId, isProfessor, projectId); 
+        } else {
+            throw new IllegalArgumentException("Debe especificar projectId, taskId o deliveryId");
+        }
         Feedback f = new Feedback();
         f.setContent(content);
         f.setCreatedAt(OffsetDateTime.now());
@@ -64,7 +69,7 @@ public class FeedbackService {
         f.setAuthorId(userId);
         Feedback saved = feedbackRepository.save(f);
         auditLogService.logAction(userId, "COMMENT_CREATE", "feedback", saved.getId());
-        rabbitTemplate.convertAndSend("feedback.topic", new WsEvent("feedback.created", saved));
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.created", new WsEvent("feedback.created", saved));
         return saved;
     }
 
@@ -78,7 +83,7 @@ public class FeedbackService {
         f.setUpdatedAt(OffsetDateTime.now());
         Feedback saved = feedbackRepository.save(f);
         auditLogService.logAction(userId, "COMMENT_UPDATE", "feedback", saved.getId());
-        rabbitTemplate.convertAndSend("feedback.topic", new WsEvent("feedback.updated", saved));
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.updated", new WsEvent("feedback.updated", saved));
         return saved;
     }
 
@@ -91,17 +96,19 @@ public class FeedbackService {
         f.setUpdatedAt(OffsetDateTime.now());
         feedbackRepository.save(f);
         auditLogService.logAction(userId, "COMMENT_DELETE", "feedback", f.getId());
-        rabbitTemplate.convertAndSend("feedback.topic", new WsEvent("feedback.deleted", id));
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.deleted", new WsEvent("feedback.deleted", id));
     }
 
-    public List<FeedbackResponse> listResponses(long userId, boolean isProfessor, long feedbackId, long deliveryId) {
-        ensureAccessToDelivery(userId, isProfessor, deliveryId);
+    public List<FeedbackResponse> listResponses(long userId, boolean isProfessor, long feedbackId) {
+        Feedback f = feedbackRepository.findById(feedbackId).orElseThrow();
+        ensureAccessByEntity(userId, isProfessor, f);
         return responseRepository.findByFeedbackIdOrderByCreatedAtAsc(feedbackId);
     }
 
     @Transactional
-    public FeedbackResponse createResponse(long userId, boolean isProfessor, long feedbackId, long deliveryId, String content) {
-        ensureAccessToDelivery(userId, isProfessor, deliveryId);
+    public FeedbackResponse createResponse(long userId, boolean isProfessor, long feedbackId, String content) {
+        Feedback f = feedbackRepository.findById(feedbackId).orElseThrow();
+        ensureAccessByEntity(userId, isProfessor, f);
         FeedbackResponse r = new FeedbackResponse();
         r.setFeedbackId(feedbackId);
         r.setContent(content);
@@ -109,7 +116,7 @@ public class FeedbackService {
         r.setAuthorId(userId);
         FeedbackResponse saved = responseRepository.save(r);
         auditLogService.logAction(userId, "REPLY_CREATE", "reply", saved.getId());
-        rabbitTemplate.convertAndSend("feedback.response", new WsEvent("reply.created", saved));
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_RESPONSE_EXCHANGE, "response.created", new WsEvent("reply.created", saved));
         return saved;
     }
 
@@ -117,14 +124,14 @@ public class FeedbackService {
     public FeedbackResponse updateResponse(long userId, boolean isProfessor, long id, String content) {
         FeedbackResponse r = responseRepository.findById(id).orElseThrow();
         Feedback f = feedbackRepository.findById(r.getFeedbackId()).orElseThrow();
-        ensureAccessToDelivery(userId, isProfessor, f.getDeliveryId());
+        ensureAccessByEntity(userId, isProfessor, f);
         if (!r.getAuthorId().equals(userId)) throw new SecurityException("Solo el autor puede editar");
         r.setContent(content);
         r.setEdited(true);
         r.setUpdatedAt(OffsetDateTime.now());
         FeedbackResponse saved = responseRepository.save(r);
         auditLogService.logAction(userId, "REPLY_UPDATE", "reply", saved.getId());
-        rabbitTemplate.convertAndSend("feedback.response", new WsEvent("reply.updated", saved));
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_RESPONSE_EXCHANGE, "response.updated", new WsEvent("reply.updated", saved));
         return saved;
     }
 
@@ -132,13 +139,13 @@ public class FeedbackService {
     public void deleteResponse(long userId, boolean isProfessor, long id) {
         FeedbackResponse r = responseRepository.findById(id).orElseThrow();
         Feedback f = feedbackRepository.findById(r.getFeedbackId()).orElseThrow();
-        ensureAccessToDelivery(userId, isProfessor, f.getDeliveryId());
+        ensureAccessByEntity(userId, isProfessor, f);
         if (!r.getAuthorId().equals(userId) && !isProfessor) throw new SecurityException("No autorizado a eliminar");
         r.setDeleted(true);
         r.setUpdatedAt(OffsetDateTime.now());
         responseRepository.save(r);
         auditLogService.logAction(userId, "REPLY_DELETE", "reply", r.getId());
-        rabbitTemplate.convertAndSend("feedback.response", new WsEvent("reply.deleted", id));
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_RESPONSE_EXCHANGE, "response.deleted", new WsEvent("reply.deleted", id));
     }
 
     private void ensureAccessToDelivery(long userId, boolean isProfessor, long deliveryId) {
@@ -164,13 +171,6 @@ public class FeedbackService {
         if (f.getTaskId() != null) { ensureAccessToTask(userId, isProfessor, f.getTaskId()); return; }
         if (f.getProjectId() != null) { ensureAccessToProject(userId, isProfessor, f.getProjectId()); return; }
         throw new SecurityException("Feedback sin scope");
-    }
-
-    private String resolveTopic(Feedback f) {
-        if (f.getDeliveryId() != null) return "/topic/delivery/" + f.getDeliveryId();
-        if (f.getTaskId() != null) return "/topic/task/" + f.getTaskId();
-        if (f.getProjectId() != null) return "/topic/project/" + f.getProjectId();
-        return "/topic/unknown";
     }
 
     public record WsEvent(String type, Object payload) { }

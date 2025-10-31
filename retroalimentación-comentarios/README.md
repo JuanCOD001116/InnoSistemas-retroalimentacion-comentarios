@@ -49,12 +49,16 @@ Para pruebas sin token, se aceptan headers X-User-Id y X-User-Role.
 
 ## Mensajes en tiempo real
 
-- El sistema de notificación en tiempo real (antes WebSocket) ahora utiliza RabbitMQ para colas de mensajes y desacoplar los productores y consumidores.
+- El sistema utiliza **RabbitMQ + WebSocket STOMP** para mensajería en tiempo real:
+  - **RabbitMQ**: Colas de mensajes (`feedback.exchange`, `feedback.response.exchange`) para desacoplar productores y consumidores.
+  - **WebSocket STOMP**: Los mensajes de RabbitMQ se reenvían automáticamente a clientes WebSocket conectados.
+  - Los eventos se publican en RabbitMQ y el servicio `WebSocketMessagingService` los reenvía a los topics STOMP correspondientes.
 
 ## Migraciones
 
 - V1__feedback_service.sql: columnas de edición/borrado + audit logs.
 - V2__feedback_scope_project_task.sql: soporte de feedback por proyecto/tarea.
+- V3__tasks_relation_to_deliveries.sql: refactorización - las tareas ahora se relacionan con entregas (deliveries) en lugar de proyectos (projects).
 
 ## Seguridad y auditoría
 

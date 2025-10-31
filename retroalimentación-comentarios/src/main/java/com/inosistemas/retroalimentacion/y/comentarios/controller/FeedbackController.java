@@ -24,7 +24,6 @@ public class FeedbackController {
 
     private record CreateFeedbackRequest(Long projectId, Long taskId, Long deliveryId, @NotBlank String content) {}
     private record UpdateRequest(@NotBlank String content) {}
-    private record CreateResponseRequest(@NotNull Long feedbackId, @NotNull Long deliveryId, @NotBlank String content) {}
 
     private long userId(Principal p) { return Long.parseLong(p.getName()); }
     private boolean isProfessor(String roleHeader) {
@@ -63,13 +62,13 @@ public class FeedbackController {
     }
 
     @GetMapping("/feedback/{id}/responses")
-    public List<FeedbackResponse> listResponses(@PathVariable long id, @RequestParam long deliveryId, @RequestHeader(value = "X-User-Role", required = false) String role, Principal principal) {
-        return service.listResponses(userId(principal), isProfessor(role), id, deliveryId);
+    public List<FeedbackResponse> listResponses(@PathVariable long id, @RequestHeader(value = "X-User-Role", required = false) String role, Principal principal) {
+        return service.listResponses(userId(principal), isProfessor(role), id);
     }
 
     @PostMapping("/feedback/{id}/responses")
-    public ResponseEntity<FeedbackResponse> createResponse(@PathVariable long id, @RequestBody UpdateRequest req, @RequestParam long deliveryId, @RequestHeader(value = "X-User-Role", required = false) String role, Principal principal) {
-        FeedbackResponse created = service.createResponse(userId(principal), isProfessor(role), id, deliveryId, req.content());
+    public ResponseEntity<FeedbackResponse> createResponse(@PathVariable long id, @RequestBody UpdateRequest req, @RequestHeader(value = "X-User-Role", required = false) String role, Principal principal) {
+        FeedbackResponse created = service.createResponse(userId(principal), isProfessor(role), id, req.content());
         return ResponseEntity.ok(created);
     }
 
