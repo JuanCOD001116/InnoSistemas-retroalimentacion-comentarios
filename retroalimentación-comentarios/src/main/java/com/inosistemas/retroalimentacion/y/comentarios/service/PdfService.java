@@ -4,7 +4,6 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 
 @Service
 public class PdfService {

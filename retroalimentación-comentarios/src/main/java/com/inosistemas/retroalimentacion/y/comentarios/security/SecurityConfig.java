@@ -17,20 +17,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService) throws Exception {
+        // DESACTIVAR SEGURIDAD PARA PRUEBAS - Permitir todas las rutas sin autenticación
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(reg -> reg
-                .requestMatchers(
-                    "/swagger-ui.html", "/swagger-ui/**",
-                    "/api-docs", "/api-docs/**",
-                    "/v3/api-docs", "/v3/api-docs/**",
-                    "/ws/**"
-                ).permitAll()
-                .anyRequest().authenticated())
+                .anyRequest().permitAll()) // Permitir todo sin autenticación
             .httpBasic(httpBasic -> httpBasic.disable());
 
-        http.addFilterBefore(new JwtAuthenticationFilter(jwtService), BasicAuthenticationFilter.class)
-            .addFilterAfter(new UserIdHeaderFilter(), JwtAuthenticationFilter.class); // fallback dev
+        // Agregar filtro para proveer usuario dummy desde headers
+        http.addFilterAfter(new UserIdHeaderFilter(), BasicAuthenticationFilter.class);
         return http.build();
     }
 

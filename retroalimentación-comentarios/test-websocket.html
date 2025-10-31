@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test WebSocket - Retroalimentación</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 { color: #333; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        button.disconnect { background: #f44336; }
+        button.disconnect:hover { background: #da190b; }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.connected { background: #d4edda; color: #155724; }
+        .status.disconnected { background: #f8d7da; color: #721c24; }
+        .messages {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .message {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #4CAF50;
+            background: white;
+            border-radius: 4px;
+        }
+        .message-header {
+            font-weight: bold;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .message-body {
+            margin-top: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+    <h1>🧪 Test WebSocket - Retroalimentación y Comentarios</h1>
+
+    <div class="container">
+        <h2>🔌 Conexión WebSocket</h2>
+        <div id="status" class="status disconnected">
+            Estado: Desconectado
+        </div>
+        <button onclick="connect()">Conectar</button>
+        <button onclick="disconnect()" class="disconnect">Desconectar</button>
+    </div>
+
+    <div class="container">
+        <h2>📡 Suscripciones</h2>
+        <div class="form-group">
+            <label>Tipo de Suscripción:</label>
+            <select id="subscriptionType">
+                <option value="delivery">Delivery</option>
+                <option value="task">Task</option>
+                <option value="project">Project</option>
+            </select>
+            <input type="number" id="subscriptionId" placeholder="ID (ej: 1)" value="1">
+            <button onclick="subscribe()">Suscribirse</button>
+        </div>
+        <div id="subscriptions"></div>
+    </div>
+
+    <div class="container">
+        <h2>💬 Mensajes Recibidos</h2>
+        <button onclick="clearMessages()">Limpiar Mensajes</button>
+        <div id="messages" class="messages"></div>
+    </div>
+
+    <div class="container">
+        <h2>🧪 Prueba de API</h2>
+        <p>Usa estos endpoints para probar (desde Postman, cURL, o Thunder Client):</p>
+        <div class="form-group">
+            <label>Delivery ID:</label>
+            <input type="number" id="testDeliveryId" value="1">
+        </div>
+        <div class="form-group">
+            <label>Task ID:</label>
+            <input type="number" id="testTaskId" value="5">
+        </div>
+        <div class="form-group">
+            <label>Project ID:</label>
+            <input type="number" id="testProjectId" value="201">
+        </div>
+        <div class="form-group">
+            <label>Contenido:</label>
+            <input type="text" id="testContent" value="Mensaje de prueba desde WebSocket Test" style="width: 400px;">
+        </div>
+        <button onclick="testFeedbackDelivery()">Crear Feedback en Delivery</button>
+        <button onclick="testFeedbackTask()">Crear Feedback en Task</button>
+        <button onclick="testFeedbackProject()">Crear Feedback en Project</button>
+        
+        <div style="margin-top: 20px; padding: 10px; background: #e3f2fd; border-radius: 4px;">
+            <strong>Ejemplos de cURL:</strong>
+            <pre style="font-size: 0.85em;">
+# Feedback en Delivery
+curl -X POST http://localhost:8080/api/v1/feedback \
+  -H "Content-Type: application/json" \
+  -d '{"deliveryId": 1, "content": "Mensaje de prueba"}'
+
+# Feedback en Task
+curl -X POST http://localhost:8080/api/v1/feedback \
+  -H "Content-Type: application/json" \
+  -d '{"taskId": 5, "content": "Mensaje de prueba"}'
+
+# Feedback en Project
+curl -X POST http://localhost:8080/api/v1/feedback \
+  -H "Content-Type: application/json" \
+  -d '{"projectId": 201, "content": "Mensaje de prueba"}'
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        let stompClient = null;
+        const subscriptions = new Map();
+
+        function updateStatus(connected) {
+            const status = document.getElementById('status');
+            if (connected) {
+                status.className = 'status connected';
+                status.textContent = 'Estado: Conectado ✓';
+            } else {
+                status.className = 'status disconnected';
+                status.textContent = 'Estado: Desconectado ✗';
+            }
+        }
+
+        function connect() {
+            const socket = new SockJS('http://localhost:8080/ws');
+            stompClient = Stomp.over(socket);
+            
+            // Deshabilitar logging detallado
+            stompClient.debug = () => {};
+            
+            stompClient.connect({}, function(frame) {
+                console.log('Conectado: ' + frame);
+                updateStatus(true);
+                addMessage('system', 'Conectado a WebSocket exitosamente');
+            }, function(error) {
+                console.error('Error de conexión:', error);
+                updateStatus(false);
+                addMessage('error', 'Error al conectar: ' + error);
+            });
+        }
+
+        function disconnect() {
+            if (stompClient !== null) {
+                // Desuscribirse de todos los topics
+                subscriptions.forEach((sub, topic) => {
+                    sub.unsubscribe();
+                    subscriptions.delete(topic);
+                });
+                stompClient.disconnect();
+                updateStatus(false);
+                addMessage('system', 'Desconectado de WebSocket');
+                document.getElementById('subscriptions').innerHTML = '';
+            }
+        }
+
+        function subscribe() {
+            if (!stompClient || !stompClient.connected) {
+                alert('Primero debes conectar el WebSocket');
+                return;
+            }
+
+            const type = document.getElementById('subscriptionType').value;
+            const id = document.getElementById('subscriptionId').value;
+            
+            if (!id) {
+                alert('Debes ingresar un ID');
+                return;
+            }
+
+            const topic = `/topic/${type}/${id}`;
+            
+            if (subscriptions.has(topic)) {
+                alert('Ya estás suscrito a este topic');
+                return;
+            }
+
+            const subscription = stompClient.subscribe(topic, function(message) {
+                const event = JSON.parse(message.body);
+                addMessage(type, event);
+            });
+
+            subscriptions.set(topic, subscription);
+            
+            // Mostrar suscripciones activas
+            const subsDiv = document.getElementById('subscriptions');
+            const subEl = document.createElement('div');
+            subEl.innerHTML = `<strong>✓ Suscrito a:</strong> ${topic} <button onclick="unsubscribe('${topic}')">Desuscribirse</button>`;
+            subsDiv.appendChild(subEl);
+            
+            addMessage('system', `Suscrito a ${topic}`);
+        }
+
+        function unsubscribe(topic) {
+            const sub = subscriptions.get(topic);
+            if (sub) {
+                sub.unsubscribe();
+                subscriptions.delete(topic);
+                addMessage('system', `Desuscrito de ${topic}`);
+                
+                // Actualizar UI
+                const subsDiv = document.getElementById('subscriptions');
+                subsDiv.innerHTML = '';
+                subscriptions.forEach((s, t) => {
+                    const subEl = document.createElement('div');
+                    subEl.innerHTML = `<strong>✓ Suscrito a:</strong> ${t} <button onclick="unsubscribe('${t}')">Desuscribirse</button>`;
+                    subsDiv.appendChild(subEl);
+                });
+            }
+        }
+
+        function addMessage(type, data) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            
+            const now = new Date().toLocaleTimeString();
+            let content = '';
+            
+            if (typeof data === 'string') {
+                content = data;
+            } else {
+                content = JSON.stringify(data, null, 2);
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-header">[${now}] ${type.toUpperCase()}</div>
+                <div class="message-body">${content}</div>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+        }
+
+        async function testFeedbackDelivery() {
+            const deliveryId = document.getElementById('testDeliveryId').value;
+            const content = document.getElementById('testContent').value;
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ deliveryId: parseInt(deliveryId), content })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addMessage('test', `Feedback creado: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    addMessage('error', `Error: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                addMessage('error', `Error: ${error.message}`);
+            }
+        }
+
+        async function testFeedbackTask() {
+            const taskId = document.getElementById('testTaskId').value;
+            const content = document.getElementById('testContent').value;
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ taskId: parseInt(taskId), content })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addMessage('test', `Feedback creado: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    addMessage('error', `Error: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                addMessage('error', `Error: ${error.message}`);
+            }
+        }
+
+        async function testFeedbackProject() {
+            const projectId = document.getElementById('testProjectId').value;
+            const content = document.getElementById('testContent').value;
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ projectId: parseInt(projectId), content })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addMessage('test', `Feedback creado: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    addMessage('error', `Error: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                addMessage('error', `Error: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
+

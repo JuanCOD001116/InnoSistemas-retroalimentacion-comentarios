@@ -2,15 +2,25 @@
 
 ## Ejecutar en local
 
-1. Java 21 + Maven Wrapper.
-2. Opcional: crea un archivo `.env` (se carga automático) con tus overrides.
-3. Arranca:
-
-```
-mvnw spring-boot:run
-```
+1. **Java 21 + Maven Wrapper.**
+2. **RabbitMQ (requerido para mensajería):**
+   ```bash
+   docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+   ```
+   Accede a RabbitMQ Management: http://localhost:15672 (guest/guest)
+3. **Opcional:** crea un archivo `.env` (se carga automático) con tus overrides.
+4. **Arranca:**
+   ```
+   ./mvnw spring-boot:run
+   ```
 
 Defaults ya configurados: conexión a Neon, JWT HS256 y WebSocket CORS `*`.
+
+> 📚 **Documentación detallada:**
+> - [EJEMPLOS_API.md](EJEMPLOS_API.md) - Ejemplos de todos los endpoints
+> - [CONFIGURACION_RABBITMQ_WEBSOCKET.md](CONFIGURACION_RABBITMQ_WEBSOCKET.md) - Configuración completa de RabbitMQ y WebSocket
+> - [PRUEBAS_COMPLETAS.md](PRUEBAS_COMPLETAS.md) - Guía paso a paso de pruebas
+> - [test-websocket.html](test-websocket.html) - Página HTML para probar WebSocket en el navegador
 
 ## Variables (.env opcional)
 

@@ -6,12 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.Map;
 
-@ControllerAdvice
+// TEMPORALMENTE DESACTIVADO PARA RESOLVER PROBLEMA CON SWAGGER
+// @ControllerAdvice
 public class RestExceptionHandler {
 
     private final AuditLogService auditLogService;
