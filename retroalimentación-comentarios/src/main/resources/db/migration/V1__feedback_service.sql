@@ -81,8 +81,8 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   action VARCHAR(64) NOT NULL,
   target_type VARCHAR(32) NOT NULL,
   target_id BIGINT,
-  metadata JSONB,
-  ip INET,
+  metadata TEXT,
+  ip VARCHAR(50),
   user_agent TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

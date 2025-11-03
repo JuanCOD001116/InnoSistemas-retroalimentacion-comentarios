@@ -3,6 +3,8 @@ package com.inosistemas.retroalimentacion.y.comentarios.service;
 import com.inosistemas.retroalimentacion.y.comentarios.domain.AuditLog;
 import com.inosistemas.retroalimentacion.y.comentarios.repository.AuditLogRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 
@@ -15,6 +17,7 @@ public class AuditLogService {
         this.repository = repository;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void logAccessDenied(Long userId, String targetType, Long targetId, String ip, String userAgent,
             String reason) {
         AuditLog l = new AuditLog();
@@ -29,6 +32,7 @@ public class AuditLogService {
         repository.save(l);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void logAction(Long userId, String action, String targetType, Long targetId) {
         AuditLog l = new AuditLog();
         l.setUserId(userId);

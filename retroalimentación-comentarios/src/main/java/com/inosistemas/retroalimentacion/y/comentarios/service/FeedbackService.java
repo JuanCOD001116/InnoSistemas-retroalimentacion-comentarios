@@ -53,57 +53,52 @@ public class FeedbackService {
     @Transactional
     public Feedback createFeedback(long userId, boolean isProfessor, Long projectId, Long taskId, Long deliveryId,
             String content) {
-        try {
-            // Normalizar valores 0 a null para cumplir con la restricción
-            // chk_feedback_scope
-            projectId = (projectId != null && projectId == 0) ? null : projectId;
-            taskId = (taskId != null && taskId == 0) ? null : taskId;
-            deliveryId = (deliveryId != null && deliveryId == 0) ? null : deliveryId;
+        // Normalizar valores 0 a null para cumplir con la restricción
+        // chk_feedback_scope
+        projectId = (projectId != null && projectId == 0) ? null : projectId;
+        taskId = (taskId != null && taskId == 0) ? null : taskId;
+        deliveryId = (deliveryId != null && deliveryId == 0) ? null : deliveryId;
 
-            // VALIDACIONES DE AUTORIZACIÓN DESACTIVADAS PARA PRUEBAS
-            if (deliveryId != null) {
-                // ensureAccessToDelivery(userId, isProfessor, deliveryId);
-            } else if (taskId != null) {
-                // ensureAccessToTask(userId, isProfessor, taskId);
-            } else if (projectId != null) {
-                // ensureAccessToProject(userId, isProfessor, projectId);
-            } else {
-                throw new IllegalArgumentException("Debe especificar projectId, taskId o deliveryId");
-            }
-            Feedback f = new Feedback();
-            f.setContent(content);
-            f.setCreatedAt(OffsetDateTime.now());
-            f.setDeliveryId(deliveryId);
-            f.setTaskId(taskId);
-            f.setProjectId(projectId);
-            f.setAuthorId(userId);
-            Feedback saved = feedbackRepository.save(f);
-
-            try {
-                auditLogService.logAction(userId, "COMMENT_CREATE", "feedback", saved.getId());
-            } catch (Exception e) {
-                System.err.println("[AuditLog] Error al registrar acción: " + e.getMessage());
-                e.printStackTrace();
-            }
-
-            // Publicar en RabbitMQ con manejo de errores
-            try {
-                rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.created",
-                        new WsEvent("feedback.created", saved));
-                System.out.println("[RabbitMQ] Feedback publicado exitosamente: " + saved.getId());
-            } catch (Exception e) {
-                System.err.println("[RabbitMQ] Error al publicar feedback: " + e.getMessage());
-                System.err.println("[RabbitMQ] Tipo de error: " + e.getClass().getName());
-                e.printStackTrace();
-                // No lanzamos la excepción para que el feedback se guarde igualmente
-            }
-
-            return saved;
-        } catch (Exception e) {
-            System.err.println("[FeedbackService] Error general en createFeedback: " + e.getMessage());
-            e.printStackTrace();
-            throw e; // Re-lanzamos para que el controller pueda manejarlo
+        // VALIDACIONES DE AUTORIZACIÓN DESACTIVADAS PARA PRUEBAS
+        if (deliveryId != null) {
+            // ensureAccessToDelivery(userId, isProfessor, deliveryId);
+        } else if (taskId != null) {
+            // ensureAccessToTask(userId, isProfessor, taskId);
+        } else if (projectId != null) {
+            // ensureAccessToProject(userId, isProfessor, projectId);
+        } else {
+            throw new IllegalArgumentException("Debe especificar projectId, taskId o deliveryId");
         }
+
+        Feedback f = new Feedback();
+        f.setContent(content);
+        f.setCreatedAt(OffsetDateTime.now());
+        f.setDeliveryId(deliveryId);
+        f.setTaskId(taskId);
+        f.setProjectId(projectId);
+        f.setAuthorId(userId);
+        Feedback saved = feedbackRepository.save(f);
+
+        // Audit en transacción separada (REQUIRES_NEW) - no afecta el commit principal
+        try {
+            auditLogService.logAction(userId, "COMMENT_CREATE", "feedback", saved.getId());
+        } catch (Exception e) {
+            System.err.println("[AuditLog] Error al registrar acción: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Publicar en RabbitMQ con manejo de errores
+        try {
+            rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.created",
+                    new WsEvent("feedback.created", saved));
+            System.out.println("[RabbitMQ] Feedback publicado exitosamente: " + saved.getId());
+        } catch (Exception e) {
+            System.err.println("[RabbitMQ] Error al publicar feedback: " + e.getMessage());
+            System.err.println("[RabbitMQ] Tipo de error: " + e.getClass().getName());
+            e.printStackTrace();
+        }
+
+        return saved;
     }
 
     @Transactional
@@ -143,6 +138,38 @@ public class FeedbackService {
         // Feedback f = feedbackRepository.findById(feedbackId).orElseThrow();
         // ensureAccessByEntity(userId, isProfessor, f);
         return responseRepository.findByFeedbackIdOrderByCreatedAtAsc(feedbackId);
+    }
+
+    /**
+     * Obtiene todos los feedbacks de un delivery con sus respuestas asociadas.
+     * 
+     * @param userId      ID del usuario que solicita los datos
+     * @param isProfessor Si el usuario es profesor
+     * @param deliveryId  ID del delivery
+     * @return Lista de feedbacks con sus respuestas
+     */
+    public List<FeedbackWithResponses> getFeedbacksWithResponsesByDelivery(long userId, boolean isProfessor,
+            long deliveryId) {
+        // VALIDACIONES DE AUTORIZACIÓN DESACTIVADAS PARA PRUEBAS
+        // ensureAccessToDelivery(userId, isProfessor, deliveryId);
+
+        // Obtener todos los feedbacks del delivery
+        List<Feedback> feedbacks = feedbackRepository.findByDeliveryIdOrderByCreatedAtAsc(deliveryId);
+
+        // Para cada feedback, obtener sus respuestas
+        return feedbacks.stream()
+                .map(feedback -> {
+                    List<FeedbackResponse> responses = responseRepository
+                            .findByFeedbackIdOrderByCreatedAtAsc(feedback.getId());
+                    return new FeedbackWithResponses(feedback, responses);
+                })
+                .toList();
+    }
+
+    /**
+     * Record para encapsular un feedback con sus respuestas.
+     */
+    public record FeedbackWithResponses(Feedback feedback, List<FeedbackResponse> responses) {
     }
 
     @Transactional
