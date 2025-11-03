@@ -2,6 +2,28 @@
 
 ## Ejecutar en local
 
+### ⚡ Inicio Rápido (Recomendado)
+
+Usa los scripts automatizados que inician RabbitMQ y la aplicación con un solo comando:
+
+**Linux/Mac:**
+```bash
+./start.sh
+```
+
+**Windows:**
+```powershell
+.\start.ps1
+```
+
+Para detener todos los servicios:
+```bash
+./stop.sh    # Linux/Mac
+.\stop.ps1   # Windows
+```
+
+### 🔧 Inicio Manual
+
 1. **Java 21 + Maven Wrapper.**
 2. **RabbitMQ (requerido para mensajería):**
    ```bash

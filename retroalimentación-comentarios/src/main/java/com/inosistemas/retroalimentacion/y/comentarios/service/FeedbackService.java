@@ -50,6 +50,16 @@ public class FeedbackService {
         throw new IllegalArgumentException("Debe especificar projectId, taskId o deliveryId");
     }
 
+    public List<Feedback> listAll() {
+        // ENDPOINT PARA PRUEBAS/ADMINISTRACIÓN - Lista TODOS los feedbacks sin filtros
+        return feedbackRepository.findAll();
+    }
+
+    public List<FeedbackResponse> listAllResponses() {
+        // ENDPOINT PARA PRUEBAS/ADMINISTRACIÓN - Lista TODAS las respuestas sin filtros
+        return responseRepository.findAll();
+    }
+
     @Transactional
     public Feedback createFeedback(long userId, boolean isProfessor, Long projectId, Long taskId, Long deliveryId,
             String content) {
@@ -79,12 +89,8 @@ public class FeedbackService {
             f.setAuthorId(userId);
             Feedback saved = feedbackRepository.save(f);
 
-            try {
-                auditLogService.logAction(userId, "COMMENT_CREATE", "feedback", saved.getId());
-            } catch (Exception e) {
-                System.err.println("[AuditLog] Error al registrar acción: " + e.getMessage());
-                e.printStackTrace();
-            }
+            // Audit log
+            auditLogService.logAction(userId, "COMMENT_CREATE", "feedback", saved.getId());
 
             // Publicar en RabbitMQ con manejo de errores
             try {

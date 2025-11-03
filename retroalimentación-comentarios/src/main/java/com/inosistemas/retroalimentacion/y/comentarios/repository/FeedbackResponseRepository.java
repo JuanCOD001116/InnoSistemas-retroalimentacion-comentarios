@@ -11,6 +11,7 @@ public interface FeedbackResponseRepository extends JpaRepository<FeedbackRespon
 
     @Query("select r from FeedbackResponse r where r.feedbackId = :feedbackId and r.deleted = false order by r.createdAt asc")
     List<FeedbackResponse> findByFeedbackIdOrderByCreatedAtAsc(@Param("feedbackId") Long feedbackId);
+
+    @Query("select r from FeedbackResponse r where r.feedbackId = :feedbackId order by r.createdAt asc")
+    List<FeedbackResponse> findByFeedbackId(@Param("feedbackId") Long feedbackId);
 }
-
-

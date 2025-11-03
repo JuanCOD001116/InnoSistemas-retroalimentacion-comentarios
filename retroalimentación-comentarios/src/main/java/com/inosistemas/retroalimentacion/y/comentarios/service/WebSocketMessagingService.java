@@ -70,6 +70,27 @@ public class WebSocketMessagingService {
      * Topics: /topic/delivery/{id}, /topic/task/{id}, or /topic/project/{id}
      */
     private String determineTopic(Object payload) {
+        // Handle simple payload types (e.g., just an ID for delete events)
+        if (payload instanceof Number) {
+            // For delete events with just an ID, we need to look up the feedback from DB
+            Long feedbackId = ((Number) payload).longValue();
+            return feedbackRepository.findById(feedbackId)
+                .map(this::determineTopicFromFeedback)
+                .orElse(null);
+        }
+        
+        // Handle string payloads that might be IDs
+        if (payload instanceof String) {
+            try {
+                Long feedbackId = Long.parseLong((String) payload);
+                return feedbackRepository.findById(feedbackId)
+                    .map(this::determineTopicFromFeedback)
+                    .orElse(null);
+            } catch (NumberFormatException e) {
+                // Not a simple ID, continue with normal processing
+            }
+        }
+        
         // If payload is a Feedback entity directly, extract topic from it
         if (payload instanceof Feedback) {
             return determineTopicFromFeedback((Feedback) payload);
@@ -112,6 +133,26 @@ public class WebSocketMessagingService {
      */
     private String determineTopicForResponse(Object payload) {
         try {
+            // Handle simple payload types (e.g., just an ID for delete events)
+            if (payload instanceof Number) {
+                // For delete events with just an ID, we can't determine the topic without DB lookup
+                // This is acceptable - delete notifications will be skipped
+                System.out.println("[WebSocket] Delete event with ID: " + payload + " - skipping topic determination");
+                return null;
+            }
+            
+            // Handle string payloads
+            if (payload instanceof String) {
+                try {
+                    Long id = Long.parseLong((String) payload);
+                    System.out.println("[WebSocket] Delete event with ID: " + id + " - skipping topic determination");
+                    return null;
+                } catch (NumberFormatException e) {
+                    // Not a simple ID, try to parse as JSON
+                }
+            }
+            
+            // Handle complex objects
             String json = objectMapper.writeValueAsString(payload);
             var map = objectMapper.readValue(json, java.util.Map.class);
             
@@ -124,6 +165,7 @@ public class WebSocketMessagingService {
             }
         } catch (Exception e) {
             System.err.println("[WebSocket] Error parsing response payload: " + e.getMessage());
+            e.printStackTrace();
         }
         
         return null;

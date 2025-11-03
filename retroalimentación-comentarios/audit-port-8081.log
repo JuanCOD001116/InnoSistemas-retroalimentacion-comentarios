@@ -1,0 +1,98 @@
+nohup: ignoring input
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------< com.inosistemas:retroalimentacion-y-comentarios >-----------
+[INFO] Building retroalimentacion-y-comentarios 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.7:run (default-cli) > test-compile @ retroalimentacion-y-comentarios >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ retroalimentacion-y-comentarios ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 4 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ retroalimentacion-y-comentarios ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ retroalimentacion-y-comentarios ---
+[INFO] skip non existing resourceDirectory /workspace/retroalimentación-comentarios/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ retroalimentacion-y-comentarios ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.5.7:run (default-cli) < test-compile @ retroalimentacion-y-comentarios <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.7:run (default-cli) @ retroalimentacion-y-comentarios ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+2025-11-03T04:23:41.059Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] RetroalimentacionYComentariosApplication : Starting RetroalimentacionYComentariosApplication using Java 21 with PID 57014 (/workspace/retroalimentación-comentarios/target/classes started by developer in /workspace/retroalimentación-comentarios)
+2025-11-03T04:23:41.062Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] RetroalimentacionYComentariosApplication : No active profile set, falling back to 1 default profile: "default"
+2025-11-03T04:23:42.113Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-11-03T04:23:42.156Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 36 ms. Found 3 JPA repository interfaces.
+2025-11-03T04:23:42.699Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2025-11-03T04:23:42.709Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-11-03T04:23:42.710Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.48]
+2025-11-03T04:23:42.760Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-11-03T04:23:42.761Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1646 ms
+2025-11-03T04:23:42.947Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-11-03T04:23:43.089Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@1a88c4f5
+2025-11-03T04:23:43.090Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-11-03T04:23:43.113Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://db:5432/InnosistemasDB (PostgreSQL 18.0)
+2025-11-03T04:23:43.119Z  WARN 57014 --- [retroalimentacion-y-comentarios] [           main] o.f.c.internal.database.base.Database    : Flyway upgrade recommended: PostgreSQL 18.0 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2025-11-03T04:23:43.150Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 4 migrations (execution time 00:00.023s)
+2025-11-03T04:23:43.175Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 4
+2025-11-03T04:23:43.177Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2025-11-03T04:23:43.248Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-11-03T04:23:43.286Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.33.Final
+2025-11-03T04:23:43.307Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-11-03T04:23:43.521Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-11-03T04:23:43.591Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 18.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-11-03T04:23:44.197Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-11-03T04:23:44.199Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-11-03T04:23:44.405Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-11-03T04:23:45.248Z  WARN 57014 --- [retroalimentacion-y-comentarios] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-11-03T04:23:45.328Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-11-03T04:23:45.850Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
+2025-11-03T04:23:45.851Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@26420ed1]]
+2025-11-03T04:23:45.851Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
+2025-11-03T04:23:45.861Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
+2025-11-03T04:23:45.863Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.s.a.r.c.CachingConnectionFactory       : Attempting to connect to: [rabbitmq:5672]
+2025-11-03T04:23:45.936Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] o.s.a.r.c.CachingConnectionFactory       : Created new connection: rabbitConnectionFactory#353aadd7:0/SimpleConnection@5fe9851f [delegate=amqp://guest@172.18.0.3:5672/, localPort=35062]
+2025-11-03T04:23:45.991Z  INFO 57014 --- [retroalimentacion-y-comentarios] [           main] RetroalimentacionYComentariosApplication : Started RetroalimentacionYComentariosApplication in 5.349 seconds (process running for 5.71)
+2025-11-03T04:24:05.628Z  INFO 57014 --- [retroalimentacion-y-comentarios] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-11-03T04:24:05.629Z  INFO 57014 --- [retroalimentacion-y-comentarios] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-11-03T04:24:05.630Z  INFO 57014 --- [retroalimentacion-y-comentarios] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+[RabbitMQ] Feedback publicado exitosamente: 19
+2025-11-03T04:24:45.836Z  INFO 57014 --- [retroalimentacion-y-comentarios] [MessageBroker-1] o.s.w.s.c.WebSocketMessageBrokerStats    : WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
+2025-11-03T04:33:58.347Z  WARN 57014 --- [retroalimentacion-y-comentarios] [nio-8081-exec-3] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  10:31 min
+[INFO] Finished at: 2025-11-03T04:34:10Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:3.5.7:run (default-cli) on project retroalimentacion-y-comentarios: Process terminated with exit code: 137 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

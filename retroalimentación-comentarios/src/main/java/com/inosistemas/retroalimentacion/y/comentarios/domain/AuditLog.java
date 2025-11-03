@@ -1,6 +1,8 @@
 package com.inosistemas.retroalimentacion.y.comentarios.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -23,11 +25,11 @@ public class AuditLog {
     @Column(name = "target_id")
     private Long targetId;
 
-    @Column(name = "metadata", columnDefinition = "text")
+    @Column(name = "metadata", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String metadata;
 
-    @Column(name = "ip")
-    @org.hibernate.annotations.JdbcTypeCode(java.sql.Types.VARCHAR)
+    @Column(name = "ip", length = 45)
     private String ip;
 
     @Column(name = "user_agent")
