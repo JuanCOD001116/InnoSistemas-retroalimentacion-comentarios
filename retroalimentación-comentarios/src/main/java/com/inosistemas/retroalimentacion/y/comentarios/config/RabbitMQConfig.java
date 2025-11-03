@@ -1,8 +1,11 @@
 package com.inosistemas.retroalimentacion.y.comentarios.config;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 public class RabbitMQConfig {
@@ -68,6 +71,15 @@ public class RabbitMQConfig {
             .bind(feedbackResponseQueue())
             .to(feedbackResponseTopicExchange())
             .with("response.*");
+    }
+
+    /**
+     * Configure Jackson2JsonMessageConverter to use JSON instead of Java serialization.
+     * This avoids security issues with Java deserialization.
+     */
+    @Bean
+    public MessageConverter jsonMessageConverter(ObjectMapper objectMapper) {
+        return new Jackson2JsonMessageConverter(objectMapper);
     }
 }
 

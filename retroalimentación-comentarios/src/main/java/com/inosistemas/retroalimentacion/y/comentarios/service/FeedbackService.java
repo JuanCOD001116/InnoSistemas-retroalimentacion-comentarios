@@ -22,10 +22,10 @@ public class FeedbackService {
     private final AuditLogService auditLogService;
 
     public FeedbackService(FeedbackRepository feedbackRepository,
-                           FeedbackResponseRepository responseRepository,
-                           AuthorizationService authorizationService,
-                           RabbitTemplate rabbitTemplate,
-                           AuditLogService auditLogService) {
+            FeedbackResponseRepository responseRepository,
+            AuthorizationService authorizationService,
+            RabbitTemplate rabbitTemplate,
+            AuditLogService auditLogService) {
         this.feedbackRepository = feedbackRepository;
         this.responseRepository = responseRepository;
         this.authorizationService = authorizationService;
@@ -51,15 +51,22 @@ public class FeedbackService {
     }
 
     @Transactional
-    public Feedback createFeedback(long userId, boolean isProfessor, Long projectId, Long taskId, Long deliveryId, String content) {
+    public Feedback createFeedback(long userId, boolean isProfessor, Long projectId, Long taskId, Long deliveryId,
+            String content) {
         try {
+            // Normalizar valores 0 a null para cumplir con la restricción
+            // chk_feedback_scope
+            projectId = (projectId != null && projectId == 0) ? null : projectId;
+            taskId = (taskId != null && taskId == 0) ? null : taskId;
+            deliveryId = (deliveryId != null && deliveryId == 0) ? null : deliveryId;
+
             // VALIDACIONES DE AUTORIZACIÓN DESACTIVADAS PARA PRUEBAS
-            if (deliveryId != null) { 
-                // ensureAccessToDelivery(userId, isProfessor, deliveryId); 
-            } else if (taskId != null) { 
-                // ensureAccessToTask(userId, isProfessor, taskId); 
-            } else if (projectId != null) { 
-                // ensureAccessToProject(userId, isProfessor, projectId); 
+            if (deliveryId != null) {
+                // ensureAccessToDelivery(userId, isProfessor, deliveryId);
+            } else if (taskId != null) {
+                // ensureAccessToTask(userId, isProfessor, taskId);
+            } else if (projectId != null) {
+                // ensureAccessToProject(userId, isProfessor, projectId);
             } else {
                 throw new IllegalArgumentException("Debe especificar projectId, taskId o deliveryId");
             }
@@ -71,17 +78,18 @@ public class FeedbackService {
             f.setProjectId(projectId);
             f.setAuthorId(userId);
             Feedback saved = feedbackRepository.save(f);
-            
+
             try {
                 auditLogService.logAction(userId, "COMMENT_CREATE", "feedback", saved.getId());
             } catch (Exception e) {
                 System.err.println("[AuditLog] Error al registrar acción: " + e.getMessage());
                 e.printStackTrace();
             }
-            
+
             // Publicar en RabbitMQ con manejo de errores
             try {
-                rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.created", new WsEvent("feedback.created", saved));
+                rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.created",
+                        new WsEvent("feedback.created", saved));
                 System.out.println("[RabbitMQ] Feedback publicado exitosamente: " + saved.getId());
             } catch (Exception e) {
                 System.err.println("[RabbitMQ] Error al publicar feedback: " + e.getMessage());
@@ -89,7 +97,7 @@ public class FeedbackService {
                 e.printStackTrace();
                 // No lanzamos la excepción para que el feedback se guarde igualmente
             }
-            
+
             return saved;
         } catch (Exception e) {
             System.err.println("[FeedbackService] Error general en createFeedback: " + e.getMessage());
@@ -103,13 +111,15 @@ public class FeedbackService {
         Feedback f = feedbackRepository.findById(id).orElseThrow();
         // VALIDACIONES DE AUTORIZACIÓN DESACTIVADAS PARA PRUEBAS
         // ensureAccessByEntity(userId, isProfessor, f);
-        // if (!f.getAuthorId().equals(userId)) throw new SecurityException("Solo el autor puede editar");
+        // if (!f.getAuthorId().equals(userId)) throw new SecurityException("Solo el
+        // autor puede editar");
         f.setContent(content);
         f.setEdited(true);
         f.setUpdatedAt(OffsetDateTime.now());
         Feedback saved = feedbackRepository.save(f);
         auditLogService.logAction(userId, "COMMENT_UPDATE", "feedback", saved.getId());
-        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.updated", new WsEvent("feedback.updated", saved));
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.updated",
+                new WsEvent("feedback.updated", saved));
         return saved;
     }
 
@@ -118,12 +128,14 @@ public class FeedbackService {
         Feedback f = feedbackRepository.findById(id).orElseThrow();
         // VALIDACIONES DE AUTORIZACIÓN DESACTIVADAS PARA PRUEBAS
         // ensureAccessByEntity(userId, isProfessor, f);
-        // if (!f.getAuthorId().equals(userId) && !isProfessor) throw new SecurityException("No autorizado a eliminar");
+        // if (!f.getAuthorId().equals(userId) && !isProfessor) throw new
+        // SecurityException("No autorizado a eliminar");
         f.setDeleted(true);
         f.setUpdatedAt(OffsetDateTime.now());
         feedbackRepository.save(f);
         auditLogService.logAction(userId, "COMMENT_DELETE", "feedback", f.getId());
-        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.deleted", new WsEvent("feedback.deleted", id));
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.deleted",
+                new WsEvent("feedback.deleted", id));
     }
 
     public List<FeedbackResponse> listResponses(long userId, boolean isProfessor, long feedbackId) {
@@ -145,7 +157,8 @@ public class FeedbackService {
         r.setAuthorId(userId);
         FeedbackResponse saved = responseRepository.save(r);
         auditLogService.logAction(userId, "REPLY_CREATE", "reply", saved.getId());
-        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_RESPONSE_EXCHANGE, "response.created", new WsEvent("reply.created", saved));
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_RESPONSE_EXCHANGE, "response.created",
+                new WsEvent("reply.created", saved));
         return saved;
     }
 
@@ -155,13 +168,15 @@ public class FeedbackService {
         // VALIDACIONES DE AUTORIZACIÓN DESACTIVADAS PARA PRUEBAS
         // Feedback f = feedbackRepository.findById(r.getFeedbackId()).orElseThrow();
         // ensureAccessByEntity(userId, isProfessor, f);
-        // if (!r.getAuthorId().equals(userId)) throw new SecurityException("Solo el autor puede editar");
+        // if (!r.getAuthorId().equals(userId)) throw new SecurityException("Solo el
+        // autor puede editar");
         r.setContent(content);
         r.setEdited(true);
         r.setUpdatedAt(OffsetDateTime.now());
         FeedbackResponse saved = responseRepository.save(r);
         auditLogService.logAction(userId, "REPLY_UPDATE", "reply", saved.getId());
-        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_RESPONSE_EXCHANGE, "response.updated", new WsEvent("reply.updated", saved));
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_RESPONSE_EXCHANGE, "response.updated",
+                new WsEvent("reply.updated", saved));
         return saved;
     }
 
@@ -171,41 +186,54 @@ public class FeedbackService {
         // VALIDACIONES DE AUTORIZACIÓN DESACTIVADAS PARA PRUEBAS
         // Feedback f = feedbackRepository.findById(r.getFeedbackId()).orElseThrow();
         // ensureAccessByEntity(userId, isProfessor, f);
-        // if (!r.getAuthorId().equals(userId) && !isProfessor) throw new SecurityException("No autorizado a eliminar");
+        // if (!r.getAuthorId().equals(userId) && !isProfessor) throw new
+        // SecurityException("No autorizado a eliminar");
         r.setDeleted(true);
         r.setUpdatedAt(OffsetDateTime.now());
         responseRepository.save(r);
         auditLogService.logAction(userId, "REPLY_DELETE", "reply", r.getId());
-        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_RESPONSE_EXCHANGE, "response.deleted", new WsEvent("reply.deleted", id));
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FEEDBACK_RESPONSE_EXCHANGE, "response.deleted",
+                new WsEvent("reply.deleted", id));
     }
 
     private void ensureAccessToDelivery(long userId, boolean isProfessor, long deliveryId) {
         boolean ok = isProfessor ? authorizationService.canAccessDeliveryAsProfessor(userId, deliveryId)
                 : authorizationService.canAccessDeliveryAsStudent(userId, deliveryId);
-        if (!ok) throw new SecurityException("Acceso denegado");
+        if (!ok)
+            throw new SecurityException("Acceso denegado");
     }
 
     private void ensureAccessToProject(long userId, boolean isProfessor, long projectId) {
         boolean ok = isProfessor ? authorizationService.canAccessProjectAsProfessor(userId, projectId)
                 : authorizationService.canAccessProjectAsStudent(userId, projectId);
-        if (!ok) throw new SecurityException("Acceso denegado");
+        if (!ok)
+            throw new SecurityException("Acceso denegado");
     }
 
     private void ensureAccessToTask(long userId, boolean isProfessor, long taskId) {
         boolean ok = isProfessor ? authorizationService.canAccessTaskAsProfessor(userId, taskId)
                 : authorizationService.canAccessTaskAsStudent(userId, taskId);
-        if (!ok) throw new SecurityException("Acceso denegado");
+        if (!ok)
+            throw new SecurityException("Acceso denegado");
     }
 
     @SuppressWarnings("unused") // Método comentado temporalmente para pruebas
     private void ensureAccessByEntity(long userId, boolean isProfessor, Feedback f) {
-        if (f.getDeliveryId() != null) { ensureAccessToDelivery(userId, isProfessor, f.getDeliveryId()); return; }
-        if (f.getTaskId() != null) { ensureAccessToTask(userId, isProfessor, f.getTaskId()); return; }
-        if (f.getProjectId() != null) { ensureAccessToProject(userId, isProfessor, f.getProjectId()); return; }
+        if (f.getDeliveryId() != null) {
+            ensureAccessToDelivery(userId, isProfessor, f.getDeliveryId());
+            return;
+        }
+        if (f.getTaskId() != null) {
+            ensureAccessToTask(userId, isProfessor, f.getTaskId());
+            return;
+        }
+        if (f.getProjectId() != null) {
+            ensureAccessToProject(userId, isProfessor, f.getProjectId());
+            return;
+        }
         throw new SecurityException("Feedback sin scope");
     }
 
-    public record WsEvent(String type, Object payload) { }
+    public record WsEvent(String type, Object payload) implements java.io.Serializable {
+    }
 }
-
-

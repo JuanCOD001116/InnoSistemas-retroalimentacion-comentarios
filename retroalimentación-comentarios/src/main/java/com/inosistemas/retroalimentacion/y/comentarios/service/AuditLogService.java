@@ -1,4 +1,4 @@
- package com.inosistemas.retroalimentacion.y.comentarios.service;
+package com.inosistemas.retroalimentacion.y.comentarios.service;
 
 import com.inosistemas.retroalimentacion.y.comentarios.domain.AuditLog;
 import com.inosistemas.retroalimentacion.y.comentarios.repository.AuditLogRepository;
@@ -11,9 +11,12 @@ public class AuditLogService {
 
     private final AuditLogRepository repository;
 
-    public AuditLogService(AuditLogRepository repository) { this.repository = repository; }
+    public AuditLogService(AuditLogRepository repository) {
+        this.repository = repository;
+    }
 
-    public void logAccessDenied(Long userId, String targetType, Long targetId, String ip, String userAgent, String reason) {
+    public void logAccessDenied(Long userId, String targetType, Long targetId, String ip, String userAgent,
+            String reason) {
         AuditLog l = new AuditLog();
         l.setUserId(userId);
         l.setAction("ACCESS_DENIED");
@@ -32,11 +35,12 @@ public class AuditLogService {
         l.setAction(action);
         l.setTargetType(targetType);
         l.setTargetId(targetId);
+        l.setIp(null); // Explícitamente NULL para evitar problemas de tipo
         l.setCreatedAt(OffsetDateTime.now());
         repository.save(l);
     }
 
-    private String safe(String s) { return s == null ? "" : s.replace("\"", "'"); }
+    private String safe(String s) {
+        return s == null ? "" : s.replace("\"", "'");
+    }
 }
-
-
