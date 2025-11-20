@@ -2,6 +2,7 @@ package com.inosistemas.retroalimentacion.y.comentarios.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,8 +15,13 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Retroalimentación y Comentarios API")
                         .version("1.0")
-                        .description("API para gestión de retroalimentación y comentarios"));
+                        .description("API para gestión de retroalimentación y comentarios"))
+                .addServersItem(new Server()
+                        .url("http://localhost:8092")
+                        .description("Servidor Local"))
+                .addServersItem(new Server()
+                        .url("https://glowing-eureka-4jqjv5vw9p5xfqxwj-8092.app.github.dev")
+                        .description("Servidor GitHub Codespaces"));
     }
 
 }
-

@@ -1,0 +1,110 @@
+========================================
+PRUEBA DE ENDPOINTS CON ERRORES
+========================================
+
+=========================================
+1. STUDENT REPORTS - Requiere X-User-Id
+=========================================
+[1;33mProbando:[0m Listar reportes de estudiante 101
+  URL: GET http://localhost:8092/api/v1/student-reports
+  [0;32m✅ HTTP 200[0m
+  Respuesta: [{"id":4,"studentId":101,"studentName":"Estudiante 101","projectId":1000,"projectName":"Proyecto Sistemas Distribuidos","finalGrade":69.5,"generatedAt":"2025-11-20T04:06:16.673125529Z","deliveries":[{
+
+[1;33mProbando:[0m Listar reportes de estudiante 101 por proyecto 1000
+  URL: GET http://localhost:8092/api/v1/student-reports?projectId=1000
+  [0;32m✅ HTTP 200[0m
+  Respuesta: [{"id":4,"studentId":101,"studentName":"Estudiante 101","projectId":1000,"projectName":"Proyecto Sistemas Distribuidos","finalGrade":69.5,"generatedAt":"2025-11-20T04:06:16.673125529Z","deliveries":[{
+
+[1;33mProbando:[0m Obtener reporte estudiante ID 4 (student 101)
+  URL: GET http://localhost:8092/api/v1/student-reports/4
+  [0;32m✅ HTTP 200[0m
+  Respuesta: {"id":4,"studentId":101,"studentName":"Estudiante 101","projectId":1000,"projectName":"Proyecto Sistemas Distribuidos","finalGrade":69.5,"generatedAt":"2025-11-20T04:06:16.673125529Z","deliveries":[{"
+
+[1;33mProbando:[0m Verificar acceso estudiante 101 a proyecto 1000
+  URL: GET http://localhost:8092/api/v1/student-reports/can-access/1000
+  [0;32m✅ HTTP 200[0m
+  Respuesta: {"canAccess":true}
+
+=========================================
+2. FEEDBACK SEARCH - Requiere query
+=========================================
+[1;33mProbando:[0m Buscar feedback con query 'validación'
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=validación
+  [0;31m❌ HTTP 400[0m
+  Error: <!doctype html><html lang="en"><head><title>HTTP Status 400 – Bad Request</title><style type="text/css">body {font-family:Tahoma,Arial,sans-serif;} h1, h2, h3, b {color:white;background-color:#525D76;} h1 {font-size:22px;} h2 {font-size:16px;} h3 {font-size:14px;} p {font-size:12px;} a {color:black;} .line {height:1px;background-color:#525D76;border:none;}</style></head><body><h1>HTTP Status 400 – Bad Request</h1></body></html>
+
+[1;33mProbando:[0m Buscar feedback 'bien' en delivery 1
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=bien&deliveryId=1
+  [0;32m✅ HTTP 200[0m
+  Respuesta: []
+
+[1;33mProbando:[0m Buscar feedback 'código' en task 1
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=código&taskId=1
+  [0;31m❌ HTTP 400[0m
+  Error: <!doctype html><html lang="en"><head><title>HTTP Status 400 – Bad Request</title><style type="text/css">body {font-family:Tahoma,Arial,sans-serif;} h1, h2, h3, b {color:white;background-color:#525D76;} h1 {font-size:22px;} h2 {font-size:16px;} h3 {font-size:14px;} p {font-size:12px;} a {color:black;} .line {height:1px;background-color:#525D76;border:none;}</style></head><body><h1>HTTP Status 400 – Bad Request</h1></body></html>
+
+[1;33mProbando:[0m Buscar feedback 'proyecto' en project 1
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=proyecto&projectId=1
+  [0;32m✅ HTTP 200[0m
+  Respuesta: []
+
+=========================================
+3. PROFESSOR DELIVERIES - Detalles
+=========================================
+[1;33mProbando:[0m Obtener detalle de delivery 3000
+  URL: GET http://localhost:8092/api/v1/professor/deliveries/3000
+  [0;32m✅ HTTP 200[0m
+  Respuesta: {"delivery":{"id":3000,"title":"Entrega Sprint 1 - Backend API","description":"Implementación inicial de endpoints REST y autenticación JWT","teamId":10,"createdAt":"2025-11-05T03:51:07.253398Z","up
+
+[1;33mProbando:[0m Obtener detalle de delivery 3001
+  URL: GET http://localhost:8092/api/v1/professor/deliveries/3001
+  [0;32m✅ HTTP 200[0m
+  Respuesta: {"delivery":{"id":3001,"title":"Entrega Sprint 1 - Base de Datos","description":"Diseño del esquema y migraciones iniciales con Flyway","teamId":10,"createdAt":"2025-11-06T03:51:07.253398Z","updatedA
+
+[1;33mProbando:[0m Obtener detalle de delivery 3002
+  URL: GET http://localhost:8092/api/v1/professor/deliveries/3002
+  [0;32m✅ HTTP 200[0m
+  Respuesta: {"delivery":{"id":3002,"title":"Entrega Sprint 2 - Frontend","description":"Interfaz de usuario con React y componentes principales","teamId":10,"createdAt":"2025-11-07T03:51:07.253398Z","updatedAt":"
+
+=========================================
+4. TASK DETAILS
+=========================================
+[1;33mProbando:[0m Obtener detalle de task 2000 en delivery 3000
+  URL: GET http://localhost:8092/api/v1/deliveries/3000/tasks/2000
+  [0;32m✅ HTTP 200[0m
+  Respuesta: {"task":{"id":2000,"title":"Implementar autenticación JWT","description":"Sistema completo de login, registro y refresh tokens","deliveryId":3000,"status":"completed","createdAt":"2025-11-05T03:51:07
+
+[1;33mProbando:[0m Obtener detalle de task 2001 en delivery 3001
+  URL: GET http://localhost:8092/api/v1/deliveries/3001/tasks/2001
+  [0;32m✅ HTTP 200[0m
+  Respuesta: {"task":{"id":2001,"title":"Diseñar esquema de base de datos","description":"Modelo ER y normalización de tablas principales","deliveryId":3001,"status":"completed","createdAt":"2025-11-06T03:51:07.
+
+=========================================
+5. REPORTS - Requieren parámetros
+=========================================
+[1;33mProbando:[0m Reporte estudiante para proyecto 1000
+  URL: GET http://localhost:8092/api/v1/reports/student?projectId=1000
+  [0;32m✅ HTTP 200[0m
+  Respuesta: {"project":{"id":1000,"name":"Proyecto Sistemas Distribuidos","description":"Implementación completa de sistema de microservicios con Spring Boot, Docker y Kubernetes"},"feedback":[{"id":24,"content"
+
+[1;33mProbando:[0m Reporte equipo 10
+  URL: GET http://localhost:8092/api/v1/reports/team?teamId=10
+  [0;32m✅ HTTP 200[0m
+  Respuesta: {"team":{"id":10,"name":"Equipo Alpha - Microservicios","project_id":1000},"deliveries":[{"id":3000,"title":"Entrega Sprint 1 - Backend API","created_at":"2025-11-05T03:51:07.253+00:00"},{"id":3001,"t
+
+=========================================
+6. TEAM REPORTS - Con autenticación
+=========================================
+[1;33mProbando:[0m Obtener team-report ID 7 con profesor 1
+  URL: GET http://localhost:8092/api/v1/team-reports/7
+  [0;32m✅ HTTP 200[0m
+  Respuesta: {"id":null,"teamId":10,"teamName":"Equipo 10","courseId":100,"courseName":"Sistemas Distribuidos 2025-1","professorId":1,"professorName":"Profesor 1","generatedAt":"2025-11-20T04:06:17.138681649Z","pr
+
+[1;33mProbando:[0m Obtener team-report ID 8 con profesor 1
+  URL: GET http://localhost:8092/api/v1/team-reports/8
+  [0;32m✅ HTTP 200[0m
+  Respuesta: {"id":null,"teamId":20,"teamName":"Equipo 20","courseId":101,"courseName":"Arquitectura de Software 2025-1","professorId":1,"professorName":"Profesor 1","generatedAt":"2025-11-20T04:06:17.271795056Z",
+
+=========================================
+PRUEBAS COMPLETADAS
+=========================================

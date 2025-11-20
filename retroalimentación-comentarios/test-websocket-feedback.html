@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test RabbitMQ + WebSocket - Retroalimentación en Tiempo Real</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        h2 {
+            color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #008CBA;
+        }
+
+        .btn-secondary:hover {
+            background: #007399;
+        }
+
+        .event {
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4CAF50;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .event.feedback-created {
+            border-left-color: #4CAF50;
+        }
+
+        .event.feedback-updated {
+            border-left-color: #2196F3;
+        }
+
+        .event.feedback-deleted {
+            border-left-color: #f44336;
+        }
+
+        .event.reply-created {
+            border-left-color: #FF9800;
+        }
+
+        .event.reply-updated {
+            border-left-color: #9C27B0;
+        }
+
+        .event.reply-deleted {
+            border-left-color: #795548;
+        }
+
+        .event-type {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .event-time {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .event-content {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+        }
+
+        .logs {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+        }
+
+        .log-info {
+            color: #4CAF50;
+        }
+
+        .log-warning {
+            color: #FF9800;
+        }
+
+        .log-error {
+            color: #f44336;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔄 Test de RabbitMQ + WebSocket en Tiempo Real</h1>
+
+    <div class="container">
+        <h2>📡 Estado de Conexión</h2>
+        <div id="connectionStatus" class="status waiting">⏳ Desconectado - Haz clic en Conectar</div>
+        <button id="connectBtn" onclick="connectWebSocket()">Conectar a WebSocket</button>
+        <button id="disconnectBtn" onclick="disconnectWebSocket()" disabled>Desconectar</button>
+    </div>
+
+    <div class="grid">
+        <div class="container">
+            <h2>📝 Crear Retroalimentación (Feedback)</h2>
+            <form id="feedbackForm" onsubmit="createFeedback(event)">
+                <div class="form-group">
+                    <label>Usuario ID (Profesor):</label>
+                    <input type="number" id="userId" value="100" required>
+                </div>
+                <div class="form-group">
+                    <label>Scope:</label>
+                    <select id="scope">
+                        <option value="project">Proyecto</option>
+                        <option value="delivery">Entrega</option>
+                        <option value="task">Tarea</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Project ID:</label>
+                    <input type="number" id="projectId" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Delivery ID (opcional):</label>
+                    <input type="number" id="deliveryId" value="1">
+                </div>
+                <div class="form-group">
+                    <label>Contenido:</label>
+                    <textarea id="feedbackContent" placeholder="Escribe tu retroalimentación aquí..."
+                        required>Excelente trabajo en el proyecto. La implementación está bien estructurada.</textarea>
+                </div>
+                <button type="submit">📤 Enviar Retroalimentación</button>
+            </form>
+        </div>
+
+        <div class="container">
+            <h2>💬 Crear Respuesta de Estudiante</h2>
+            <form id="responseForm" onsubmit="createResponse(event)">
+                <div class="form-group">
+                    <label>Usuario ID (Estudiante):</label>
+                    <input type="number" id="studentId" value="200" required>
+                </div>
+                <div class="form-group">
+                    <label>Feedback ID (a responder):</label>
+                    <input type="number" id="feedbackId" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Respuesta:</label>
+                    <textarea id="responseContent" placeholder="Escribe la respuesta del estudiante..."
+                        required>Gracias por el feedback. Ya realicé las correcciones sugeridas.</textarea>
+                </div>
+                <button type="submit" class="btn-secondary">💬 Enviar Respuesta</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📬 Eventos Recibidos en Tiempo Real</h2>
+        <button onclick="clearEvents()">🗑️ Limpiar Eventos</button>
+        <div id="events"></div>
+    </div>
+
+    <div class="container">
+        <h2>📊 Logs del Sistema</h2>
+        <button onclick="clearLogs()">🗑️ Limpiar Logs</button>
+        <div id="logs" class="logs"></div>
+    </div>
+
+    <!-- SockJS and STOMP libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <script>
+        const API_BASE = 'http://localhost:8092/api/v1';
+        const WS_URL = 'http://localhost:8092/ws-feedback';
+
+        let stompClient = null;
+        let subscriptions = [];
+
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            const colorClass = type === 'error' ? 'log-error' : type === 'warning' ? 'log-warning' : 'log-info';
+            logsDiv.innerHTML += `<div class="log-entry ${colorClass}">[${time}] ${message}</div>`;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function updateStatus(message, className) {
+            const statusDiv = document.getElementById('connectionStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${className}`;
+        }
+
+        function connectWebSocket() {
+            log('Intentando conectar a WebSocket...', 'info');
+            updateStatus('⏳ Conectando...', 'waiting');
+
+            const socket = new SockJS(WS_URL);
+            stompClient = Stomp.over(socket);
+
+            // Deshabilitar logs de STOMP en consola (opcional)
+            stompClient.debug = null;
+
+            stompClient.connect({}, function (frame) {
+                log('✅ Conectado exitosamente a WebSocket', 'info');
+                updateStatus('✅ Conectado al servidor WebSocket', 'connected');
+
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').disabled = false;
+
+                // Suscribirse a todos los feedbacks (puedes ajustar esto)
+                // En producción, suscribirte solo a los feedbacks relevantes
+                subscribeToFeedbackEvents();
+
+            }, function (error) {
+                log('❌ Error de conexión: ' + error, 'error');
+                updateStatus('❌ Error de conexión', 'disconnected');
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('disconnectBtn').disabled = true;
+            });
+        }
+
+        function disconnectWebSocket() {
+            if (stompClient !== null) {
+                subscriptions.forEach(sub => sub.unsubscribe());
+                subscriptions = [];
+                stompClient.disconnect();
+                stompClient = null;
+                log('🔌 Desconectado de WebSocket', 'warning');
+                updateStatus('🔌 Desconectado', 'disconnected');
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('disconnectBtn').disabled = true;
+            }
+        }
+
+        function subscribeToFeedbackEvents() {
+            // Suscribirse a eventos de feedback (genérico)
+            // En producción, suscribirte a IDs específicos
+            for (let i = 1; i <= 20; i++) {
+                const subFeedback = stompClient.subscribe(`/topic/feedback/${i}`, function (message) {
+                    const event = JSON.parse(message.body);
+                    handleEvent(event, `feedback-${i}`);
+                });
+                subscriptions.push(subFeedback);
+
+                const subResponse = stompClient.subscribe(`/topic/response/${i}`, function (message) {
+                    const event = JSON.parse(message.body);
+                    handleEvent(event, `response-${i}`);
+                });
+                subscriptions.push(subResponse);
+            }
+            log(`📡 Suscrito a 40 topics (feedback y responses del 1 al 20)`, 'info');
+        }
+
+        function handleEvent(event, topic) {
+            log(`📨 Evento recibido en ${topic}: ${event.type}`, 'info');
+
+            const eventsDiv = document.getElementById('events');
+            const eventDiv = document.createElement('div');
+            eventDiv.className = `event ${event.type.replace('.', '-')}`;
+
+            const time = new Date().toLocaleTimeString();
+            const payload = event.payload;
+
+            let contentHtml = '';
+            if (payload.content) {
+                contentHtml = `<div class="event-content"><strong>Contenido:</strong> ${payload.content}</div>`;
+            }
+
+            eventDiv.innerHTML = `
+                <div class="event-type">🔔 ${event.type}</div>
+                <div class="event-time">⏰ ${time} | Topic: ${topic}</div>
+                ${contentHtml}
+                <div><strong>ID:</strong> ${payload.id || 'N/A'}</div>
+                <div><strong>Author ID:</strong> ${payload.authorId || 'N/A'}</div>
+                ${payload.feedbackId ? `<div><strong>Feedback ID:</strong> ${payload.feedbackId}</div>` : ''}
+                <pre style="background: #f0f0f0; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(payload, null, 2)}</pre>
+            `;
+
+            eventsDiv.insertBefore(eventDiv, eventsDiv.firstChild);
+
+            // Animación visual
+            eventDiv.style.animation = 'slideIn 0.5s ease';
+        }
+
+        async function createFeedback(event) {
+            event.preventDefault();
+
+            const userId = document.getElementById('userId').value;
+            const projectId = document.getElementById('projectId').value;
+            const deliveryId = document.getElementById('deliveryId').value || null;
+            const content = document.getElementById('feedbackContent').value;
+
+            const body = {
+                content: content,
+                projectId: parseInt(projectId),
+                deliveryId: deliveryId ? parseInt(deliveryId) : null,
+                taskId: null
+            };
+
+            log(`📤 Enviando feedback desde usuario ${userId}...`, 'info');
+
+            try {
+                const response = await fetch(`${API_BASE}/feedback`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-Id': userId
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Feedback creado con ID: ${data.id}`, 'info');
+                    log(`🐰 RabbitMQ publicará el evento "feedback.created"`, 'info');
+                    log(`🔌 WebSocket enviará notificación a /topic/feedback/${data.id}`, 'info');
+                } else {
+                    const error = await response.text();
+                    log(`❌ Error al crear feedback: ${error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error de conexión: ${error.message}`, 'error');
+            }
+        }
+
+        async function createResponse(event) {
+            event.preventDefault();
+
+            const studentId = document.getElementById('studentId').value;
+            const feedbackId = document.getElementById('feedbackId').value;
+            const content = document.getElementById('responseContent').value;
+
+            const body = {
+                content: content
+            };
+
+            log(`📤 Enviando respuesta desde estudiante ${studentId} al feedback ${feedbackId}...`, 'info');
+
+            try {
+                const response = await fetch(`${API_BASE}/feedback/${feedbackId}/responses`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-Id': studentId
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Respuesta creada con ID: ${data.id}`, 'info');
+                    log(`🐰 RabbitMQ publicará el evento "response.created"`, 'info');
+                    log(`🔌 WebSocket enviará notificación a /topic/response/${data.id}`, 'info');
+                } else {
+                    const error = await response.text();
+                    log(`❌ Error al crear respuesta: ${error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error de conexión: ${error.message}`, 'error');
+            }
+        }
+
+        function clearEvents() {
+            document.getElementById('events').innerHTML = '';
+            log('🗑️ Eventos limpiados', 'info');
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        // Auto-conectar al cargar la página (opcional)
+        window.addEventListener('load', function () {
+            log('🚀 Aplicación iniciada. Haz clic en "Conectar" para empezar.', 'info');
+        });
+    </script>
+
+    <style>
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</body>
+
+</html>

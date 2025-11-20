@@ -1,0 +1,294 @@
+════════════════════════════════════════════════════════════════
+           PRUEBAS EXHAUSTIVAS DE ENDPOINTS API
+════════════════════════════════════════════════════════════════
+Fecha: Thu Nov 20 04:16:51 UTC 2025
+Base URL: http://localhost:8092/api/v1
+════════════════════════════════════════════════════════════════
+
+[1;33m═══ CATEGORÍA 1: STUDENT REPORTS (8 pruebas) ═══[0m
+
+[0;34mTest #1:[0m Listar todos los reportes del estudiante 101
+  URL: GET http://localhost:8092/api/v1/student-reports
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:51.741+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/student-reports"}
+
+[0;34mTest #2:[0m Filtrar reportes por proyecto 1000
+  URL: GET http://localhost:8092/api/v1/student-reports?projectId=1000
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:51.773+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/student-reports"}
+
+[0;34mTest #3:[0m Filtrar reportes por proyecto 1001 (estudiante 101)
+  URL: GET http://localhost:8092/api/v1/student-reports?projectId=1001
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:51.801+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/student-reports"}
+
+[0;34mTest #4:[0m Obtener reporte específico ID 4 (estudiante 101)
+  URL: GET http://localhost:8092/api/v1/student-reports/4
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"message":"Error al obtener el reporte","details":"JDBC exception executing SQL [select sr1_0.id,sr1_0.created_at,sr1_0.final_grade,sr1_0.generated_at,sr1_0.project_id,sr1_0.report_data,sr1_0.student_id,sr1_0.summary,sr1_0.title from student_reports sr1_0 where sr1_0.id=?] [ERROR: relation \"studen
+
+[0;34mTest #5:[0m Obtener reporte específico ID 5 (estudiante 102)
+  URL: GET http://localhost:8092/api/v1/student-reports/5
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"message":"Error al obtener el reporte","details":"JDBC exception executing SQL [select sr1_0.id,sr1_0.created_at,sr1_0.final_grade,sr1_0.generated_at,sr1_0.project_id,sr1_0.report_data,sr1_0.student_id,sr1_0.summary,sr1_0.title from student_reports sr1_0 where sr1_0.id=?] [ERROR: relation \"studen
+
+[0;34mTest #6:[0m Obtener reporte específico ID 6 (estudiante 105)
+  URL: GET http://localhost:8092/api/v1/student-reports/6
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"message":"Error al obtener el reporte","details":"JDBC exception executing SQL [select sr1_0.id,sr1_0.created_at,sr1_0.final_grade,sr1_0.generated_at,sr1_0.project_id,sr1_0.report_data,sr1_0.student_id,sr1_0.summary,sr1_0.title from student_reports sr1_0 where sr1_0.id=?] [ERROR: relation \"studen
+
+[0;34mTest #7:[0m Verificar acceso estudiante 101 a proyecto 1000
+  URL: GET http://localhost:8092/api/v1/student-reports/can-access/1000
+  [0;32m✅ HTTP 200[0m (esperado: 200)
+  Respuesta: {"canAccess":false}...
+
+[0;34mTest #8:[0m Verificar acceso estudiante 105 a proyecto 1001
+  URL: GET http://localhost:8092/api/v1/student-reports/can-access/1001
+  [0;32m✅ HTTP 200[0m (esperado: 200)
+  Respuesta: {"canAccess":false}...
+
+[1;33m═══ CATEGORÍA 2: FEEDBACK SEARCH (10 pruebas) ═══[0m
+
+[0;34mTest #9:[0m Búsqueda simple sin filtros - 'implementacion'
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=implementacion
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:51.938+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[0;34mTest #10:[0m Búsqueda simple sin filtros - 'sistema'
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=sistema
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:51.958+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[0;34mTest #11:[0m Búsqueda con filtro delivery 1
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=bien&deliveryId=1
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:51.985+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[0;34mTest #12:[0m Búsqueda con filtro delivery 3000
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=excelente&deliveryId=3000
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.020+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[0;34mTest #13:[0m Búsqueda con filtro task 1
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=codigo&taskId=1
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.051+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[0;34mTest #14:[0m Búsqueda con filtro task 2000
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=tarea&taskId=2000
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.095+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[0;34mTest #15:[0m Búsqueda con filtro project 1
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=proyecto&projectId=1
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.126+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[0;34mTest #16:[0m Búsqueda con filtro project 1000
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=desarrollo&projectId=1000
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.160+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[0;34mTest #17:[0m Búsqueda con múltiples filtros (delivery + task)
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=api&deliveryId=3000&taskId=2000
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.206+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[0;34mTest #18:[0m Búsqueda con múltiples filtros (project + delivery)
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=backend&projectId=1000&deliveryId=3000
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.245+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[1;33m═══ CATEGORÍA 3: PROFESSOR DELIVERIES (6 pruebas) ═══[0m
+
+[0;34mTest #19:[0m Obtener detalle delivery 3000 (Sprint 1 Backend)
+  URL: GET http://localhost:8092/api/v1/professor/deliveries/3000
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.278+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/professor/deliveries/3000"}
+
+[0;34mTest #20:[0m Obtener detalle delivery 3001 (Sprint 1 DB)
+  URL: GET http://localhost:8092/api/v1/professor/deliveries/3001
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.301+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/professor/deliveries/3001"}
+
+[0;34mTest #21:[0m Obtener detalle delivery 3002 (Sprint 2 Frontend)
+  URL: GET http://localhost:8092/api/v1/professor/deliveries/3002
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.322+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/professor/deliveries/3002"}
+
+[0;34mTest #22:[0m Obtener detalle delivery 3003 (Sprint 1 API)
+  URL: GET http://localhost:8092/api/v1/professor/deliveries/3003
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.348+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/professor/deliveries/3003"}
+
+[0;34mTest #23:[0m Obtener detalle delivery 3004 (Sprint 2 Testing)
+  URL: GET http://localhost:8092/api/v1/professor/deliveries/3004
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.382+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/professor/deliveries/3004"}
+
+[0;34mTest #24:[0m Obtener detalle delivery 3005 (Sprint 2 Deploy)
+  URL: GET http://localhost:8092/api/v1/professor/deliveries/3005
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.424+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/professor/deliveries/3005"}
+
+[1;33m═══ CATEGORÍA 4: TASK DETAILS (6 pruebas) ═══[0m
+
+[0;34mTest #25:[0m Task 2000 en delivery 3000 (Autenticación JWT)
+  URL: GET http://localhost:8092/api/v1/deliveries/3000/tasks/2000
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.486+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/deliveries/3000/tasks/2000"}
+
+[0;34mTest #26:[0m Task 2001 en delivery 3001 (Diseño esquema DB)
+  URL: GET http://localhost:8092/api/v1/deliveries/3001/tasks/2001
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.541+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/deliveries/3001/tasks/2001"}
+
+[0;34mTest #27:[0m Task 2002 en delivery 3002 (Componentes React)
+  URL: GET http://localhost:8092/api/v1/deliveries/3002/tasks/2002
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.608+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/deliveries/3002/tasks/2002"}
+
+[0;34mTest #28:[0m Task 2003 en delivery 3003 (Endpoints REST)
+  URL: GET http://localhost:8092/api/v1/deliveries/3003/tasks/2003
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.649+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/deliveries/3003/tasks/2003"}
+
+[0;34mTest #29:[0m Task 2004 en delivery 3004 (Tests unitarios)
+  URL: GET http://localhost:8092/api/v1/deliveries/3004/tasks/2004
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.689+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/deliveries/3004/tasks/2004"}
+
+[0;34mTest #30:[0m Task 2005 en delivery 3005 (CI/CD Pipeline)
+  URL: GET http://localhost:8092/api/v1/deliveries/3005/tasks/2005
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.727+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/deliveries/3005/tasks/2005"}
+
+[1;33m═══ CATEGORÍA 5: REPORTS GENERALES (6 pruebas) ═══[0m
+
+[0;34mTest #31:[0m Reporte estudiante proyecto 1000
+  URL: GET http://localhost:8092/api/v1/reports/student?projectId=1000
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.788+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/reports/student"}
+
+[0;34mTest #32:[0m Reporte estudiante proyecto 1001
+  URL: GET http://localhost:8092/api/v1/reports/student?projectId=1001
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.840+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/reports/student"}
+
+[0;34mTest #33:[0m Reporte equipo 10 (Alpha - Microservicios)
+  URL: GET http://localhost:8092/api/v1/reports/team?teamId=10
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.872+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/reports/team"}
+
+[0;34mTest #34:[0m Reporte equipo 20 (Beta - Arquitectura)
+  URL: GET http://localhost:8092/api/v1/reports/team?teamId=20
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.904+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/reports/team"}
+
+[0;34mTest #35:[0m Reporte equipo 30 (Gamma - Cloud)
+  URL: GET http://localhost:8092/api/v1/reports/team?teamId=30
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.942+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/reports/team"}
+
+[0;34mTest #36:[0m Reporte equipo 40 (Delta - DevOps)
+  URL: GET http://localhost:8092/api/v1/reports/team?teamId=40
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:52.975+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/reports/team"}
+
+[1;33m═══ CATEGORÍA 6: TEAM REPORTS (4 pruebas) ═══[0m
+
+[0;34mTest #37:[0m Team report ID 7 (equipo 10, curso 100)
+  URL: GET http://localhost:8092/api/v1/team-reports/7
+  [0;31m❌ HTTP 404[0m (esperado: 200)
+  Error: {"message":"Reporte no encontrado","details":"JDBC exception executing SQL [select tr1_0.id,tr1_0.course_id,tr1_0.created_at,tr1_0.generated_at,tr1_0.professor_id,tr1_0.report_data,tr1_0.summary,tr1_0.team_id,tr1_0.title from team_reports tr1_0 where tr1_0.id=?] [ERROR: relation \"team_reports\" doe
+
+[0;34mTest #38:[0m Team report ID 8 (equipo 20, curso 101)
+  URL: GET http://localhost:8092/api/v1/team-reports/8
+  [0;31m❌ HTTP 404[0m (esperado: 200)
+  Error: {"message":"Reporte no encontrado","details":"JDBC exception executing SQL [select tr1_0.id,tr1_0.course_id,tr1_0.created_at,tr1_0.generated_at,tr1_0.professor_id,tr1_0.report_data,tr1_0.summary,tr1_0.team_id,tr1_0.title from team_reports tr1_0 where tr1_0.id=?] [ERROR: relation \"team_reports\" doe
+
+[0;34mTest #39:[0m Listar todos los team reports del profesor 1
+  URL: GET http://localhost:8092/api/v1/team-reports
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:53.093+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/team-reports"}
+
+[0;34mTest #40:[0m Filtrar team reports por curso 100
+  URL: GET http://localhost:8092/api/v1/team-reports?courseId=100
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:53.127+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/team-reports"}
+
+[1;33m═══ CATEGORÍA 7: CASOS DE EDGE (8 pruebas) ═══[0m
+
+[0;34mTest #41:[0m Reporte inexistente ID 999 (debe fallar)
+  URL: GET http://localhost:8092/api/v1/student-reports/999
+  [0;31m❌ HTTP 500[0m (esperado: 404)
+  Error: {"message":"Error al obtener el reporte","details":"JDBC exception executing SQL [select sr1_0.id,sr1_0.created_at,sr1_0.final_grade,sr1_0.generated_at,sr1_0.project_id,sr1_0.report_data,sr1_0.student_id,sr1_0.summary,sr1_0.title from student_reports sr1_0 where sr1_0.id=?] [ERROR: relation \"studen
+
+[0;34mTest #42:[0m Delivery inexistente ID 9999 (debe fallar)
+  URL: GET http://localhost:8092/api/v1/professor/deliveries/9999
+  [0;31m❌ HTTP 500[0m (esperado: 404)
+  Error: {"timestamp":"2025-11-20T04:16:53.175+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/professor/deliveries/9999"}
+
+[0;34mTest #43:[0m Task inexistente ID 9999 (debe fallar)
+  URL: GET http://localhost:8092/api/v1/deliveries/3000/tasks/9999
+  [0;31m❌ HTTP 500[0m (esperado: 404)
+  Error: {"timestamp":"2025-11-20T04:16:53.203+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/deliveries/3000/tasks/9999"}
+
+[0;34mTest #44:[0m Team report inexistente ID 999 (debe fallar)
+  URL: GET http://localhost:8092/api/v1/team-reports/999
+  [0;32m✅ HTTP 404[0m (esperado: 404)
+  Respuesta: {"message":"Reporte no encontrado","details":"JDBC exception executing SQL [select tr1_0.id,tr1_0.course_id,tr1_0.create...
+
+[0;34mTest #45:[0m Búsqueda con query vacío
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:53.249+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[0;34mTest #46:[0m Verificar acceso a proyecto inexistente 9999
+  URL: GET http://localhost:8092/api/v1/student-reports/can-access/9999
+  [0;32m✅ HTTP 200[0m (esperado: 200)
+  Respuesta: {"canAccess":false}...
+
+[0;34mTest #47:[0m Reporte equipo inexistente 999
+  URL: GET http://localhost:8092/api/v1/reports/team?teamId=999
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:53.287+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/reports/team"}
+
+[0;34mTest #48:[0m Búsqueda sin resultados esperados
+  URL: GET http://localhost:8092/api/v1/feedback/search?query=xyzabc123notfound
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:53.309+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/feedback/search"}
+
+[1;33m═══ CATEGORÍA 8: ACCESO Y PERMISOS (4 pruebas) ═══[0m
+
+[0;34mTest #49:[0m Reportes estudiante 102 (diferente usuario)
+  URL: GET http://localhost:8092/api/v1/student-reports
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:53.333+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/student-reports"}
+
+[0;34mTest #50:[0m Acceso reporte de otro estudiante (debe funcionar por ID)
+  URL: GET http://localhost:8092/api/v1/student-reports/4
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"message":"Error al obtener el reporte","details":"JDBC exception executing SQL [select sr1_0.id,sr1_0.created_at,sr1_0.final_grade,sr1_0.generated_at,sr1_0.project_id,sr1_0.report_data,sr1_0.student_id,sr1_0.summary,sr1_0.title from student_reports sr1_0 where sr1_0.id=?] [ERROR: relation \"studen
+
+[0;34mTest #51:[0m Reporte estudiante 102 proyecto 1000
+  URL: GET http://localhost:8092/api/v1/reports/student?projectId=1000
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:53.395+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/reports/student"}
+
+[0;34mTest #52:[0m Reporte estudiante 106 proyecto 1001
+  URL: GET http://localhost:8092/api/v1/reports/student?projectId=1001
+  [0;31m❌ HTTP 500[0m (esperado: 200)
+  Error: {"timestamp":"2025-11-20T04:16:53.416+00:00","status":500,"error":"Internal Server Error","path":"/api/v1/reports/student"}
+
+════════════════════════════════════════════════════════════════
+                    RESUMEN DE PRUEBAS
+════════════════════════════════════════════════════════════════
+Total de pruebas ejecutadas: [0;34m52[0m
+Pruebas exitosas:           [0;32m4[0m
+Pruebas fallidas:           [0;31m48[0m
+
+[1;33mTasa de éxito: 7%[0m
+════════════════════════════════════════════════════════════════
+Fecha finalización: Thu Nov 20 04:16:53 UTC 2025
+════════════════════════════════════════════════════════════════
