@@ -83,7 +83,7 @@ public class StudentReportService {
         // Check if report already exists, otherwise create new one
         StudentReport report = studentReportRepository.findByStudentIdAndProjectId(studentId, projectId)
                 .orElse(new StudentReport());
-        
+
         // Update or set new values
         report.setStudentId(studentId);
         report.setProjectId(projectId);
