@@ -80,8 +80,11 @@ public class StudentReportService {
         // Calculate final grade (placeholder - in real app, this would be calculated)
         dto.setFinalGrade(calculateFinalGrade(dto.getStatistics()));
 
-        // Save the report
-        StudentReport report = new StudentReport();
+        // Check if report already exists, otherwise create new one
+        StudentReport report = studentReportRepository.findByStudentIdAndProjectId(studentId, projectId)
+                .orElse(new StudentReport());
+        
+        // Update or set new values
         report.setStudentId(studentId);
         report.setProjectId(projectId);
         report.setTitle("Reporte Final - " + projectName);
