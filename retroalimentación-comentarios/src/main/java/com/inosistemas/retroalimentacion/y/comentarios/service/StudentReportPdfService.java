@@ -57,7 +57,7 @@ public class StudentReportPdfService {
         html.append("<div class='summary'>");
         html.append("<table class='summary-table'>");
         html.append("<tr>");
-        html.append("<td><strong>Estudiante:</strong></td>");
+        html.append("<td><strong>Nombre de usuario:</strong></td>");
         html.append("<td>").append(escapeHtml(report.getStudentName())).append("</td>");
         html.append("<td><strong>Proyecto:</strong></td>");
         html.append("<td>").append(escapeHtml(report.getProjectName())).append("</td>");

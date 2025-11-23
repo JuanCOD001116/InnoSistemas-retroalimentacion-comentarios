@@ -32,39 +32,44 @@ public class ReportController {
         if (userIdHeader != null && !userIdHeader.isBlank()) {
             try {
                 return Long.parseLong(userIdHeader);
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         }
         if (p != null && p.getName() != null) {
             try {
                 return Long.parseLong(p.getName());
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         }
         return 1L; // Usuario por defecto - CUALQUIERA puede usar cualquier endpoint
     }
 
-    // ENDPOINT COMPLETAMENTE ABIERTO - Cualquier usuario puede ver reportes de estudiante
+    // ENDPOINT COMPLETAMENTE ABIERTO - Cualquier usuario puede ver reportes de
+    // estudiante
     @GetMapping("/student")
     public ResponseEntity<Map<String, Object>> studentReport(@RequestParam long projectId,
-                                                              @RequestHeader(value = "X-User-Id", required = false) String userIdHeader,
-                                                              Principal principal) {
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader,
+            Principal principal) {
         // Sin validaciones - cualquiera puede ver cualquier reporte
         return ResponseEntity.ok(service.studentProjectReport(userId(principal, userIdHeader), projectId));
     }
 
-    // ENDPOINT COMPLETAMENTE ABIERTO - Cualquier usuario puede ver reportes de equipo
+    // ENDPOINT COMPLETAMENTE ABIERTO - Cualquier usuario puede ver reportes de
+    // equipo
     @GetMapping("/team")
     public ResponseEntity<Map<String, Object>> teamReport(@RequestParam long teamId,
-                                                          @RequestHeader(value = "X-User-Id", required = false) String userIdHeader,
-                                                          Principal principal) {
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader,
+            Principal principal) {
         // Sin validaciones - cualquiera puede ver cualquier reporte
         return ResponseEntity.ok(service.teamReportForProfessor(userId(principal, userIdHeader), teamId));
     }
 
-    // ENDPOINT COMPLETAMENTE ABIERTO - Cualquier usuario puede descargar PDF de estudiante
+    // ENDPOINT COMPLETAMENTE ABIERTO - Cualquier usuario puede descargar PDF de
+    // estudiante
     @GetMapping(value = "/student/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> studentReportPdf(@RequestParam long projectId,
-                                                    @RequestHeader(value = "X-User-Id", required = false) String userIdHeader,
-                                                    Principal principal) {
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader,
+            Principal principal) {
         // Sin validaciones - cualquiera puede descargar cualquier PDF
         Map<String, Object> data = service.studentProjectReport(userId(principal, userIdHeader), projectId);
         String html = renderStudentHtml(data);
@@ -74,11 +79,12 @@ public class ReportController {
                 .body(pdf);
     }
 
-    // ENDPOINT COMPLETAMENTE ABIERTO - Cualquier usuario puede descargar PDF de equipo
+    // ENDPOINT COMPLETAMENTE ABIERTO - Cualquier usuario puede descargar PDF de
+    // equipo
     @GetMapping(value = "/team/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> teamReportPdf(@RequestParam long teamId,
-                                                @RequestHeader(value = "X-User-Id", required = false) String userIdHeader,
-                                                Principal principal) {
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader,
+            Principal principal) {
         // Sin validaciones - cualquiera puede descargar cualquier PDF
         Map<String, Object> data = service.teamReportForProfessor(userId(principal, userIdHeader), teamId);
         String html = renderTeamHtml(data);
@@ -93,7 +99,8 @@ public class ReportController {
         Map<String, Object> project = (Map<String, Object>) data.get("project");
         StringBuilder sb = new StringBuilder();
         sb.append("<p><b>Proyecto:</b> ").append(project.get("name")).append("</p>");
-        sb.append("<table><thead><tr><th>Fecha</th><th>Autor</th><th>Ámbito</th><th>Contenido</th></tr></thead><tbody>");
+        sb.append(
+                "<table><thead><tr><th>Fecha</th><th>Autor</th><th>Ámbito</th><th>Contenido</th></tr></thead><tbody>");
         for (Map<String, Object> row : (Iterable<Map<String, Object>>) data.get("feedback")) {
             sb.append("<tr>");
             sb.append("<td>").append(row.get("created_at")).append("</td>");
@@ -115,7 +122,8 @@ public class ReportController {
         for (Map<String, Object> row : (Iterable<Map<String, Object>>) data.get("deliveries")) {
             sb.append("<li>").append(row.get("title")).append(" - ").append(row.get("created_at")).append("</li>");
         }
-        sb.append("</ul><h3>Retroalimentación</h3><table><thead><tr><th>Fecha</th><th>Autor</th><th>Contenido</th></tr></thead><tbody>");
+        sb.append(
+                "</ul><h3>Retroalimentación</h3><table><thead><tr><th>Fecha</th><th>Autor</th><th>Contenido</th></tr></thead><tbody>");
         for (Map<String, Object> row : (Iterable<Map<String, Object>>) data.get("feedback")) {
             sb.append("<tr>");
             sb.append("<td>").append(row.get("created_at")).append("</td>");
@@ -127,5 +135,3 @@ public class ReportController {
         return sb.toString();
     }
 }
-
-

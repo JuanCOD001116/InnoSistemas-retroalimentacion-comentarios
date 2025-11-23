@@ -47,7 +47,8 @@ public class StudentReportService {
      * Generate a final consolidated report for a student in a specific project
      */
     @Transactional
-    public StudentReportDTO generateStudentReport(Long studentId, Long projectId, String projectName) {
+    public StudentReportDTO generateStudentReport(Long studentId, Long projectId, String projectName,
+            String studentName) {
         // Get student's team for this project
         Long teamId = getStudentTeamId(studentId, projectId);
         if (teamId == null) {
@@ -60,7 +61,7 @@ public class StudentReportService {
         // Build the report DTO
         StudentReportDTO dto = new StudentReportDTO();
         dto.setStudentId(studentId);
-        dto.setStudentName("Estudiante " + studentId); // In real app, fetch from users table
+        dto.setStudentName(studentName);
         dto.setProjectId(projectId);
         dto.setProjectName(projectName);
         dto.setGeneratedAt(OffsetDateTime.now());

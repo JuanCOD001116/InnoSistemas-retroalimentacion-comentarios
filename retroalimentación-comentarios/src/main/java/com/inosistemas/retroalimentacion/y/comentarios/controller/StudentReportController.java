@@ -38,7 +38,8 @@ public class StudentReportController {
             StudentReportDTO report = studentReportService.generateStudentReport(
                     studentId,
                     request.projectId(),
-                    request.projectName());
+                    request.projectName(),
+                    request.studentName());
             return ResponseEntity.ok(report);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -161,7 +162,7 @@ public class StudentReportController {
     }
 
     // Inner classes
-    public record GenerateReportRequest(Long projectId, String projectName) {
+    public record GenerateReportRequest(Long projectId, String projectName, String studentName) {
     }
 
     public record ErrorResponse(String message, String details) {
