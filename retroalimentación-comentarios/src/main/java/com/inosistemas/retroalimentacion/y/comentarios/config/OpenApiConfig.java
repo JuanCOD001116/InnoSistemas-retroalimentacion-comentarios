@@ -20,7 +20,7 @@ public class OpenApiConfig {
                         .url("http://localhost:8092")
                         .description("Servidor Local"))
                 .addServersItem(new Server()
-                        .url("https://glowing-eureka-4jqjv5vw9p5xfqxwj-8092.app.github.dev")
+                        .url("https://redesigned-carnival-xgq9vx6wvg43p4xg-8080.app.github.dev/")
                         .description("Servidor GitHub Codespaces"));
     }
 

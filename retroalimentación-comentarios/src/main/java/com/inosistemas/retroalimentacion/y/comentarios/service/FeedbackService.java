@@ -242,4 +242,28 @@ public class FeedbackService {
 
     public record WsEvent(String type, Object payload) implements java.io.Serializable {
     }
+
+    public List<FeedbackWithResponses> getFeedbacksWithResponsesByDelivery(long userId, boolean isProfessor,
+            long deliveryId) {
+        // VALIDACIONES DE AUTORIZACIÓN DESACTIVADAS PARA PRUEBAS
+        // ensureAccessToDelivery(userId, isProfessor, deliveryId);
+
+        // Obtener todos los feedbacks del delivery
+        List<Feedback> feedbacks = feedbackRepository.findByDeliveryIdOrderByCreatedAtAsc(deliveryId);
+
+        // Para cada feedback, obtener sus respuestas
+        return feedbacks.stream()
+                .map(feedback -> {
+                    List<FeedbackResponse> responses = responseRepository
+                            .findByFeedbackIdOrderByCreatedAtAsc(feedback.getId());
+                    return new FeedbackWithResponses(feedback, responses);
+                })
+                .toList();
+    }
+
+    /**
+     * Record para encapsular un feedback con sus respuestas.
+     */
+    public record FeedbackWithResponses(Feedback feedback, List<FeedbackResponse> responses) {
+    }
 }

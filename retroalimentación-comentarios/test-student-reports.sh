@@ -3,11 +3,11 @@
 # Test script for Student Final Report endpoints
 # Tests all 6 Gherkin scenarios
 
-BASE_URL="http://localhost:8092/api/v1/student-reports"
-STUDENT_ID_200=200  # Student in Team 1 (Backend)
-STUDENT_ID_202=202  # Student in Team 2 (Frontend)
+BASE_URL="https://redesigned-carnival-xgq9vx6wvg43p4xg-8080.app.github.dev/api/v1/student-reports"
+STUDENT_ID_200=101  # Student in Team 10 (Equipo Alpha - Microservicios)
+STUDENT_ID_202=104  # Student in Team 20 (Equipo Beta - Bases de Datos)
 STUDENT_ID_999=999  # Student NOT in any team
-PROJECT_ID=1
+PROJECT_ID=1000
 
 echo "🧪 PRUEBAS DE REPORTES FINALES DE ESTUDIANTES"
 echo "=============================================="

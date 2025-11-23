@@ -156,4 +156,20 @@ public class FeedbackController {
         service.deleteResponse(userId(principal, userIdHeader), isProfessor(role), id);
         return ResponseEntity.noContent().build();
     }
+
+    // ENDPOINT COMPLETAMENTE ABIERTO - Obtiene todos los feedbacks de un delivery
+    // con sus respuestas
+    @GetMapping("/deliveries/{deliveryId}/feedbacks-with-responses")
+    public ResponseEntity<List<FeedbackService.FeedbackWithResponses>> getFeedbacksWithResponses(
+            @PathVariable long deliveryId,
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader,
+            Principal principal) {
+        // Sin validaciones - cualquiera puede ver feedbacks con respuestas
+        List<FeedbackService.FeedbackWithResponses> result = service.getFeedbacksWithResponsesByDelivery(
+                userId(principal, userIdHeader),
+                isProfessor(role),
+                deliveryId);
+        return ResponseEntity.ok(result);
+    }
 }
